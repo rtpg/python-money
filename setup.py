@@ -2,13 +2,13 @@ import os
 from setuptools import setup
 from distutils.util import convert_path
 from distutils.command.install import INSTALL_SCHEMES
-from version import get_git_version
 
 # Tell distutils to put the data_files in platform-specific installation
 # locations. See here for an explanation:
 # http://groups.google.com/group/comp.lang.python/browse_thread/thread/35ec7b2fed36eaec/2105ee4d9e8042cb
 for scheme in INSTALL_SCHEMES.values():
     scheme['data'] = scheme['purelib']
+from money.version import get_git_version
 
 # The following technique was lifted from Django's setup.py -po
 # http://code.djangoproject.com/browser/django/trunk/setup.py
