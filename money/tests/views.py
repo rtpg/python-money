@@ -1,22 +1,17 @@
-from django import newforms as forms
+from django import forms
 from django.shortcuts import render_to_response, get_object_or_404
 from money.contrib.django.forms.fields import MoneyField
-from money import Money
 
-
-#regular form
 
 class TestForm(forms.Form):
     price = MoneyField()
 
 
 #ModelForm
-from django_test.models import TestMoneyModel
+from money.tests.models import TestMoneyModel
 class TestModelForm(forms.ModelForm):
     class Meta:
         model = TestMoneyModel
-
-
 
 
 def regular_form(request):
@@ -31,7 +26,7 @@ def regular_form(request):
     return  render_to_response('form.html', {'form':form} )
 
 def regular_form_edit(request, id):
-    instance = get_object_or_404(Entity, pk=id)
+    instance = get_object_or_404(TestMoneyModel, pk=id)
     if request.method == 'POST':
         form = TestForm(request.POST, initial={'price':instance.price})
         print form.is_valid()
@@ -55,7 +50,7 @@ def model_form(request):
     return  render_to_response('form.html', {'form':form} )
 
 def model_form_edit(request, id):
-    instance = get_object_or_404(Entity, pk=id)
+    instance = get_object_or_404(TestMoneyModel, pk=id)
     if request.method == 'POST':
         form = TestModelForm(request.POST, instance=instance)
         print form.is_valid()

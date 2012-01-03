@@ -1,2 +1,5 @@
-from models import *
-from views import *
+
+# Specify files that contain TestCases to be run
+from tests import *
+from djangotests import *
+

@@ -8,7 +8,6 @@ if not settings.configured:
         DATABASES = {
             'default': {
                 'ENGINE': 'django.db.backends.sqlite3',
-                #'NAME': 'python-money-test'
                 'NAME': ':memory;'
             }
         },
@@ -29,7 +28,6 @@ def runtests():
     # The following is a hack around a bug
     sys.exitfunc = lambda: 0
     sys.exit(failures)
-
 
 if __name__ == '__main__':
     runtests(*sys.argv[1:])
