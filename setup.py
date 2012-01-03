@@ -16,7 +16,8 @@ keywords = 'money currency finance'.split()
 
 tests_require = [
     'django<1.4',
-    'nose'
+    'nose',
+    'django_nose',
 ]
 
 install_requires = []
