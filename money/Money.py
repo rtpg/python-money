@@ -82,6 +82,8 @@ class Money:
                 return Money(amount = s.amount - other.amount, currency = DEFAULT_CURRENCY)
         else:
             return Money(amount = self.amount - Decimal(str(other)), currency = self.currency)
+    def __rsub__(self, other):
+        return Money(amount = Decimal(str(other)) - self.amount, currency = self.currency)
     def __mul__(self, other):
         if isinstance(other, Money):
             raise TypeError, 'can not multiply monetary quantities'
@@ -93,6 +95,8 @@ class Money:
             return self.amount / other.amount
         else:
             return self.amount / Decimal(str(other))
+    def __rdiv__(self, other):
+        return Decimal(str(other)) / self.amount
     def __rmod__(self, other):
         """
         Calculate percentage of an amount.  The left-hand side of the operator must be a numeric value.  E.g.:
@@ -113,9 +117,7 @@ class Money:
         return None # TODO  (How??)
 
     __radd__ = __add__
-    __rsub__ = __sub__
     __rmul__ = __mul__
-    __rdiv__ = __div__
 
     #
     # Override comparison operators
