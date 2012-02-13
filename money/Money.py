@@ -19,6 +19,12 @@ class Currency:
 
     def __repr__(self):
         return self.code
+    def __eq__(self, other):
+        if isinstance(other, Currency):
+            return self.code and other.code and self.code == other.code
+        return False
+    def __ne__(self, other):
+        return not self.__eq__(other)
     def set_exchange_rate(self, rate):
         if not isinstance(rate, Decimal):
             rate = Decimal(str(rate))
