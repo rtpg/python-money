@@ -134,30 +134,21 @@ The value you get from your model will be a `Money` class:
 The form field used by the `models.MoneyField` is also called `MoneyField` in
 
 
-### Running Django Tests
+### Running Tests
 
-There are some test cases included for the Django types. If you want to run
-them, add the test application to your INSTALLED_APPS:
+The test suite requires `nose`, `django` and `django_nose` to be installed. They
+will be downloaded and installed automatically when run.
 
-    INSTALLED_APPS = (
-    ...
-    'money.tests',
-    ...
-    )
+Tests can be run via the `setup.py` script:
 
-Run them with the manage command from your application:
+    $ python setup.py test
 
-    $ ./manage.py test money
-    Creating test database 'default'...
+or directly via the runscripts command. This can be usefull for passing
+addtional options to nose:
 
-    ...
+    $ python money/runtests.py
 
-    Ran 8 tests in 0.445s
-
-    OK
-    Destroying test database 'default'...
-    $
-
+If you wish to contribute code, please run these tests to ensure nothing breaks.
 
 
 TODO
