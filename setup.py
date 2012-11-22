@@ -45,6 +45,20 @@ for dirpath, dirnames, filenames in os.walk(start_dir):
     elif filenames:
         data_files.append([dirpath, [os.path.join(dirpath, f) for f in filenames]])
 
+keywords = 'money currency finance'.split()
+
+tests_require = [
+    'django<1.5',
+    'nose',
+    'django_nose',
+]
+
+install_requires = []
+
+extras_require = {
+    'django':  ['Django<1.4',],
+}
+
 setup(
     name='python-money',
     version=get_git_version(),

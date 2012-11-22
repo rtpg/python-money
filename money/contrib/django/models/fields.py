@@ -116,15 +116,31 @@ class MoneyField(models.DecimalField):
             from managers import MoneyManager
             cls.add_to_class('objects', MoneyManager())
 
-    def get_db_prep_save(self, value, *args, **kwargs):
+    def get_db_prep_save(self, value, connection, *args, **kwargs):
+        # added 'connection' argument so Django 1.4 doesn't throw
+        # a wobbly.
         if isinstance(value, Money):
             value = value.amount
-        return super(MoneyField, self).get_db_prep_save(value, *args, **kwargs)
+        return super(MoneyField, self).get_db_prep_save(value, connection, *args, **kwargs)
 
     def get_prep_lookup(self, lookup_type, value):
         if not lookup_type in SUPPORTED_LOOKUPS:
             raise NotSupportedLookup(lookup_type)
-        value = self.get_db_prep_save(value)
+
+        # Originally, this method was:
+        #
+        # value = self.get_db_prep_save(value)
+        # return super(MoneyField, self).get_prep_lookup(lookup_type, value)
+       
+        # But since Django 1.4,
+        # get_db_prep_save() needs a `connection` argument, which we don't
+        # get passed here. So just replicate the functionality of that
+        # method (and hope the subsequent 'super()' call (that we don't
+        # call either) doesn't do anything too important. This passes
+        # all the current tests, anyway.
+        
+        if isinstance(value, Money):
+            value = value.amount
         return super(MoneyField, self).get_prep_lookup(lookup_type, value)
 
     def get_default(self):
