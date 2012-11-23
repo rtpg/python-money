@@ -2,7 +2,7 @@
 import exceptions
 from decimal import Decimal
 
-class Currency:
+class Currency(object):
     code = "XXX"
     country = ""
     countries = []
@@ -52,7 +52,7 @@ class InvalidOperationException(exceptions.ArithmeticError):
     """Raised when an operation is never allowed"""
 
 
-class Money:
+class Money(object):
     amount = Decimal("0.0")
     currency = DEFAULT_CURRENCY
 
