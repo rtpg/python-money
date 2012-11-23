@@ -16,6 +16,7 @@ if not settings.configured:
             'money.tests',
         ],
         TEST_RUNNER = "django_nose.NoseTestSuiteRunner",
+        FIXTURE_DIRS = ('../money/contrib/django/tests/fixtures/',)
     )
 
 def runtests():

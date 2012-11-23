@@ -163,6 +163,25 @@ The value you get from your model will be a `Money` class:
     USD  199.99
 
 
+### Fixtures
+
+When loading from or searializing to fixtures, the field class expects the values
+to be specified separately:
+
+    ...
+    {
+        "pk": 1,
+        "model": "myapp.mymodel",
+        "fields": {
+            "price": "123.45",
+            "price_currency": "USD",
+        }
+    },
+    ...
+
+You may wish to examine the tests for an example
+
+
 ### Form Field
 
 The form field used by the `models.MoneyField` is also called `MoneyField` in

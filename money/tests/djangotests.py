@@ -200,3 +200,13 @@ class MoneyFieldTestCase(TestCase):
 
         ent = TestMoneyModel.objects.filter(price__exact=Money(0, "USD")).get()
         self.assertEquals(ent.price, Money(0, "USD"))
+
+
+class TestMoneyFieldFixtureLoading(TestCase):
+
+    fixtures = ['testdata.json',]
+
+    def testDataWasLoaded(self):
+        model1 = TestMoneyModel.objects.get(pk=1001)
+        self.assertEqual(model1.price, Money("123.45", "JPY"))
+

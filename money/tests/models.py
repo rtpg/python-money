@@ -15,7 +15,8 @@ class TestMoneyModel(models.Model):
 
 class TestMoneyModelDefaultMoneyUSD(models.Model):
     name = models.CharField(max_length=100)
-    price = fields.MoneyField(max_digits=12, decimal_places=3, default=Money(0, "USD"))
+    price = fields.MoneyField(max_digits=12, decimal_places=3, default=Money("123.45", "USD"))
+    zero = fields.MoneyField(max_digits=12, decimal_places=3, default=Money("0", "USD"))
 
     def __unicode__(self):
         return self.name + " " + str(self.price)
@@ -23,7 +24,9 @@ class TestMoneyModelDefaultMoneyUSD(models.Model):
 
 class TestMoneyModelDefaults(models.Model):
     name = models.CharField(max_length=100)
-    price = fields.MoneyField(max_digits=12, decimal_places=3, default=0, default_currency="USD")
+    price = fields.MoneyField(max_digits=12, decimal_places=3, default="123.45", default_currency="USD")
+    zero = fields.MoneyField(max_digits=12, decimal_places=3, default="0", default_currency="USD")
 
     def __unicode__(self):
         return self.name + " " + str(self.price)
+
