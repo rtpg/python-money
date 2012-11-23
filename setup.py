@@ -15,7 +15,7 @@ with open(os.path.join(loc, 'README.md')) as f:
 keywords = 'money currency finance'.split()
 
 tests_require = [
-    'django<1.4',
+    'django>1.4',
     'nose',
     'django_nose',
 ]
@@ -23,21 +23,7 @@ tests_require = [
 install_requires = []
 
 extras_require = {
-    'django':  ['Django<1.4',],
-}
-
-keywords = 'money currency finance'.split()
-
-tests_require = [
-    'django<1.5',
-    'nose',
-    'django_nose',
-]
-
-install_requires = []
-
-extras_require = {
-    'django':  ['Django<1.4',],
+    'django':  ['Django>1.4',],
 }
 
 setup(
