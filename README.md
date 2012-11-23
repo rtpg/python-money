@@ -97,6 +97,40 @@ add two monetary values that are in differing currency, they will first be
 converted into the default currency, and then added together.
 
 
+A Note About Equality and Math Operations
+-----------------------------------------
+
+The way equlity is currently implemented, `USD 0` is not equal to `EUR 0` however,
+`USD 0` is considered equal to `0`. This means you can only compare similar
+currencies to each other, but it is safe to compare a currancy to the value `0`.
+
+Comparing two differing currencies is undefined and will raise
+a `money.CurrencyMismatchException`. Prior versions of this project would do an
+implicit conversion to a 'base' currency using a defined conversion rate and
+perform the operation. We believe this is unexpected behavior and it is better
+to let the user do that conversion themselves for the cases where they know they
+are comparing differing currencies.
+
+Similarly, we take a conservative approach to certain math operations. For
+example, `Money(10, 'USD') - Money(3, 'JPY')` is not allowed due to differing
+currencies.
+
+Both `Money(3, 'USD') * Money(3, 'USD')` and `Money(9, 'USD') / Money(3, 'USD')`
+are undefined. There are 3 conceiveable ways to handle division:
+
+    Money(9, 'USD') / Money(3, 'USD') # Money(3, 'XXX') # where 'XXX' denotes undefined currency
+    Money(9, 'USD') / Money(3, 'USD') # Decimal('3')
+    Money(9, 'USD') / Money(3, 'USD') # raise money.InvalidOperationException
+
+We have chosen the last option as it is the most conservative option. You can
+always emulate the first two by using the underlying amounts:
+
+    Money(9, 'USD').amount / Money(3, 'USD').amount # Decimal('3')
+    Money(Money(9, 'USD').amount / Money(3, 'USD').amount) # Money('3', 'XXX')
+
+This makes the intention of the code more clear.
+
+
 Django
 ======
 
