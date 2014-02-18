@@ -4,4 +4,3 @@ include *.txt
 include *.md
 include *.py
 recursive-include money *
-recursive-include tests *

@@ -1,0 +1,18 @@
+[
+    {
+        "pk": 1001,
+        "model": "tests.testmoneymodel",
+        "fields": {
+            "price": "123.45",
+            "price_currency": "JPY"
+        }
+    },
+    {
+        "pk": 1002,
+        "model": "tests.testmoneymodel",
+        "fields": {
+            "price": "123.45",
+            "price_currency": "JPY"
+        }
+    }
+]
