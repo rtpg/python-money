@@ -8,10 +8,11 @@ class TestForm(forms.Form):
 
 
 #ModelForm
-from money.tests.models import TestMoneyModel
+from money.tests.models import SimpleMoneyModel
+
 class TestModelForm(forms.ModelForm):
     class Meta:
-        model = TestMoneyModel
+        model = SimpleMoneyModel
 
 
 def regular_form(request):
@@ -26,7 +27,7 @@ def regular_form(request):
     return  render_to_response('form.html', {'form':form} )
 
 def regular_form_edit(request, id):
-    instance = get_object_or_404(TestMoneyModel, pk=id)
+    instance = get_object_or_404(SimpleMoneyModel, pk=id)
     if request.method == 'POST':
         form = TestForm(request.POST, initial={'price':instance.price})
         print form.is_valid()
@@ -50,7 +51,7 @@ def model_form(request):
     return  render_to_response('form.html', {'form':form} )
 
 def model_form_edit(request, id):
-    instance = get_object_or_404(TestMoneyModel, pk=id)
+    instance = get_object_or_404(SimpleMoneyModel, pk=id)
     if request.method == 'POST':
         form = TestModelForm(request.POST, instance=instance)
         print form.is_valid()

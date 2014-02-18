@@ -1,17 +1,17 @@
 [
     {
         "pk": 1001,
-        "model": "tests.testmoneymodel",
+        "model": "tests.simplemoneymodel",
         "fields": {
             "price": "123.45",
-            "price_currency": "JPY"
+            "price_currency": "USD"
         }
     },
     {
         "pk": 1002,
-        "model": "tests.testmoneymodel",
+        "model": "tests.simplemoneymodel",
         "fields": {
-            "price": "123.45",
+            "price": "12345",
             "price_currency": "JPY"
         }
     }

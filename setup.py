@@ -27,15 +27,14 @@ class PyTest(TestCommand):
 keywords = 'money currency finance'.split()
 
 tests_require = [
-    'django',
-    'pytest',
     'pytest-django',
+    'django',
 ]
 
 install_requires = []
 
 extras_require = {
-    'django':  ['Django>1.4',],
+    'django':  ['Django >= 1.4',],
 }
 
 setup(
@@ -57,11 +56,11 @@ setup(
     extras_require=extras_require,
     cmdclass = {'test': PyTest},
 
-
     classifiers=[
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
         'Topic :: Office/Business :: Financial',
-    ],)
+    ],
+)

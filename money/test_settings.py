@@ -2,7 +2,6 @@ import os
 
 TEST_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'tests')
 
-
 STATIC_URL = '/static/'
 
 STATIC_ROOT = os.path.join(TEST_DIR, 'static')
