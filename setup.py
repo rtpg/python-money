@@ -1,23 +1,35 @@
 #!/usr/bin/env python
-import os
+import os, sys
+
 from setuptools import setup, find_packages
+from setuptools.command.test import test as TestCommand
 
 from money.version import get_git_version
-
-# For help with setuptools, see:
-# http://packages.python.org/distribute/setuptools.html
 
 loc = os.path.abspath(os.path.dirname(__file__))
 
 with open(os.path.join(loc, 'README.md')) as f:
     README = f.read()
 
+class PyTest(TestCommand):
+    def finalize_options(self):
+        TestCommand.finalize_options(self)
+        self.test_args = []
+        self.test_suite = True
+
+    def run_tests(self):
+        #import here, cause outside the eggs aren't loaded
+        import pytest
+        errno = pytest.main(self.test_args)
+        sys.exit(errno)
+
+
 keywords = 'money currency finance'.split()
 
 tests_require = [
     'django>1.4',
-    'nose',
-    'django_nose',
+    'pytest',
+    'pytest-django',
 ]
 
 install_requires = []
@@ -29,7 +41,6 @@ extras_require = {
 setup(
     name='python-money',
     version=get_git_version(),
-    #packages=find_packages(exclude=['tests',]),
     packages=find_packages(),
     url='http://github.com/poswald/python-money',
     description='Primitives for working with money and currencies in Python',
@@ -44,8 +55,8 @@ setup(
     install_requires=install_requires,
     tests_require=tests_require,
     extras_require=extras_require,
-    #test_suite='nose.collector',
-    test_suite='money.runtests.runtests',
+    cmdclass = {'test': PyTest},
+
 
     classifiers=[
         'Intended Audience :: Developers',

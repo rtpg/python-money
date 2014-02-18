@@ -7,6 +7,7 @@ from money import Money
 
 class TestMoneyModel(models.Model):
     name = models.CharField(max_length=100)
+    # Default should be '0.000 XXX'
     price = fields.MoneyField(max_digits=12, decimal_places=3)
 
     def __unicode__(self):

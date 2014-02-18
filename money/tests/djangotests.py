@@ -7,6 +7,9 @@ from money import Money, CURRENCY
 class MoneyFieldTestCase(TestCase):
 
     def setUp(self):
+        pass
+
+    def tearDown(self):
         #cleanup all entities
         TestMoneyModel.objects.all().delete()
         TestMoneyModelDefaultMoneyUSD.objects.all().delete()
