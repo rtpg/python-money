@@ -50,6 +50,16 @@ class MoneyFieldProxy(object):
             obj.__dict__[self.field.name] = self.field.to_python(value)
 
 
+class InfiniteDecimalField(models.DecimalField):
+    def db_type(self, connection):
+        engine = connection.settings_dict['ENGINE']
+
+        if 'psycopg2' in engine:
+            return 'numeric'
+
+        return super(InfiniteDecimalField, self).db_type(connection=connection)
+
+
 class CurrencyField(models.CharField):
     """
     This field will be added to the model behind the scenes to hold the
@@ -66,7 +76,7 @@ class CurrencyField(models.CharField):
         return value
 
 
-class MoneyField(models.DecimalField):
+class MoneyField(InfiniteDecimalField):
     description = _('An amount and type of currency')
 
     # Don't extend SubfieldBase since we need to have access to both fields when
@@ -83,8 +93,8 @@ class MoneyField(models.DecimalField):
         self.default_currency = default_currency
         super(MoneyField, self).__init__(verbose_name, name, max_digits, decimal_places, default=default, blank=blank, **kwargs)
 
-    def get_internal_type(self):
-         return "DecimalField"
+#    def get_internal_type(self):
+#         return "DecimalField"
 
     # Implementing to_python should not be needed because we are directly
     # assigning the attributes to the model with the proxy class. Some parts
@@ -116,15 +126,33 @@ class MoneyField(models.DecimalField):
             from managers import MoneyManager
             cls.add_to_class('objects', MoneyManager())
 
-    def get_db_prep_save(self, value, *args, **kwargs):
+    def get_db_prep_save(self, value, connection, *args, **kwargs):
+        # added 'connection' argument so Django 1.4 doesn't throw
+        # a wobbly.
         if isinstance(value, Money):
             value = value.amount
-        return super(MoneyField, self).get_db_prep_save(value, *args, **kwargs)
+
+        # override DecimalField's rounding
+        return self.get_db_prep_value(value, connection=connection, prepared=False)
 
     def get_prep_lookup(self, lookup_type, value):
         if not lookup_type in SUPPORTED_LOOKUPS:
             raise NotSupportedLookup(lookup_type)
-        value = self.get_db_prep_save(value)
+
+        # Originally, this method was:
+        #
+        # value = self.get_db_prep_save(value)
+        # return super(MoneyField, self).get_prep_lookup(lookup_type, value)
+       
+        # But since Django 1.4,
+        # get_db_prep_save() needs a `connection` argument, which we don't
+        # get passed here. So just replicate the functionality of that
+        # method (and hope the subsequent 'super()' call (that we don't
+        # call either) doesn't do anything too important. This passes
+        # all the current tests, anyway.
+        
+        if isinstance(value, Money):
+            value = value.amount
         return super(MoneyField, self).get_prep_lookup(lookup_type, value)
 
     def get_default(self):
