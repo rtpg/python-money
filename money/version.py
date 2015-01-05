@@ -53,12 +53,24 @@ from subprocess import Popen, PIPE
 
 
 def call_git_describe(abbrev=4):
+    """
+    The `git describe --long` command outputs in the format of:
+
+        v1.0.4-14-g2414721
+
+    Where the fields are:
+
+        <tag>-<number of commits since tag>-<hash>
+
+    """
     try:
-        p = Popen(['git', 'describe', '--abbrev=%d' % abbrev],
+        p = Popen(['git', 'describe', '--long', '--abbrev=%d' % abbrev],
                   stdout=PIPE, stderr=PIPE)
         p.stderr.close()
-        line = p.stdout.readlines()[0]
-        return line.strip()
+        line = p.stdout.readlines()[0].strip()
+
+        tag, count, sha = line.split('-')
+        return tag, count, sha
 
     except:
         return None
@@ -87,33 +99,38 @@ def write_release_version(version):
 
 def get_git_version(abbrev=4):
     # Read in the version that's currently in RELEASE-VERSION.
-
     release_version = read_release_version()
 
     # First try to get the current version using "git describe".
+    tag, count, _ = call_git_describe(abbrev)
 
-    version = call_git_describe(abbrev)
+    if count == '0':
+        # the version is the bare tag
+        version = tag
+    else:
+        version = "{}.dev{}".format(tag, count)
 
-    # If that doesn't work, fall back on the value that's in
-    # RELEASE-VERSION.
-
+    # If the version/tag was None, fall back on the value that's in
+    # the RELEASE-VERSION file.
     if version is None:
         version = release_version
 
     # If we still don't have anything, that's an error.
-
     if version is None:
         raise ValueError("Cannot find the version number!")
 
     # If the current version is different from what's in the
     # RELEASE-VERSION file, update the file to be current.
-
     if version != release_version:
         write_release_version(version)
 
     # Finally, return the current version.
-
     return version
+
+
+def get_git_hash():
+    _, _, sha = call_git_describe()
+    return sha
 
 if __name__ == "__main__":
     print get_git_version()

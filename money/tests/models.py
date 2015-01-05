@@ -2,9 +2,9 @@ from django.db import models
 from money.contrib.django.models import fields
 from money import Money
 
+
 # Tests for Django models. We set up three types of models with different
 # ways of specifying defaults
-
 class SimpleMoneyModel(models.Model):
     name = models.CharField(max_length=100)
 
@@ -40,4 +40,3 @@ class MoneyModelDefaults(models.Model):
 
     class Meta:
         app_label = 'tests'
-
