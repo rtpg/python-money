@@ -7,7 +7,7 @@ __all__ = ('QuerysetWithMoney', 'MoneyManager',)
 
 
 class QuerysetWithMoney(QuerySet):
-    
+
     def _update_params(self, kwargs):
         from django.db.models.constants import LOOKUP_SEP
         from money import Money
@@ -22,7 +22,7 @@ class QuerysetWithMoney(QuerySet):
                 to_append[field_name] = smart_unicode(value.currency)
         kwargs.update(to_append)
         return kwargs
-        
+
     def dates(self, *args, **kwargs):
         kwargs = self._update_params(kwargs)
         return super(QuerysetWithMoney, self).dates(*args, **kwargs)

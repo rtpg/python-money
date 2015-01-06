@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils.encoding import smart_unicode
 from django.utils.translation import ugettext_lazy as _
+
 from money.contrib.django import forms
 from money import Money
 
@@ -22,13 +23,16 @@ class NotSupportedLookup(TypeError):
 
 class MoneyFieldProxy(object):
     """
-    An equivalent to Django's default attribute descriptor class (enabled via
-    the SubfieldBase metaclass, see module doc for details). However, instead
-    of callig to_python() on our MoneyField class, it stores the two
-    different parts separately, and updates them whenever something is assigned.
-    If the attribute is read, it builds the instance "on-demand" with the
-    current data.
-    (see: http://blog.elsdoerfer.name/2008/01/08/fuzzydates-or-one-django-model-field-multiple-database-columns/)
+    An equivalent to Django's default attribute descriptor class SubfieldBase
+    (normally enabled via `__metaclass__ = models.SubfieldBase` on the custom
+    Field class).
+
+    Instead of calling to_python() on our MoneyField class as SubfieldBase
+    does, it stores the two different parts separately, and updates them
+    whenever something is assigned. If the attribute is read, it builds the
+    instance "on-demand" with the current data.
+
+    See: http://blog.elsdoerfer.name/2008/01/08/fuzzydates-or-one-django-model-field-multiple-database-columns/
     """
     def __init__(self, field):
         self.field = field
@@ -49,7 +53,8 @@ class MoneyFieldProxy(object):
             obj.__dict__[self.field.name] = value.amount
             setattr(obj, self.currency_field_name, smart_unicode(value.currency))
         else:
-            if value: value = str(value)
+            if value:
+                value = str(value)
             obj.__dict__[self.field.name] = self.field.to_python(value)
 
 
@@ -96,8 +101,6 @@ class MoneyField(InfiniteDecimalField):
         else:
             self.default_currency = default_currency # use the kwarg passed in
 
-#    def get_internal_type(self):
-#         return "DecimalField"
         super(MoneyField, self).__init__(*args, **kwargs)
 
     # Implementing to_python should not be needed because we are directly
@@ -137,8 +140,6 @@ class MoneyField(InfiniteDecimalField):
             cls.add_to_class('objects', MoneyManager())
 
     def get_db_prep_save(self, value, connection, *args, **kwargs):
-        # added 'connection' argument so Django 1.4 doesn't throw
-        # a wobbly.
         if isinstance(value, Money):
             value = value.amount
 
@@ -176,7 +177,7 @@ class MoneyField(InfiniteDecimalField):
         will get called to output itself
         """
         value = self._get_val_from_obj(obj)
-        return  value.amount
+        return value.amount
 
     def formfield(self, **kwargs):
         defaults = {'form_class': forms.MoneyField}
@@ -198,7 +199,8 @@ try:
     add_introspection_rules(
         patterns=["^money\.contrib\.django.\models\.fields\.MoneyField"],
         rules=[
-            (   (MoneyField,),
+            (
+                (MoneyField,),
                 [],
                 {'no_currency_field': ('add_currency_field', {})}
             )
