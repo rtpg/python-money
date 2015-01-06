@@ -14,7 +14,8 @@ from money.tests.models import (
 @pytest.mark.django_db
 class MoneyFieldTestCase(TestCase):
 
-    def assert_same_currency(self, moneys, currency=None):
+    def assertSameCurrency(self, moneys, currency=None):
+        """ Utility function to assert a collection of currencies are all the same """
         currencies = set([m.currency for m in moneys])
         self.assertTrue(len(currencies) == 1)
         if currency:
@@ -33,7 +34,6 @@ class MoneyFieldTestCase(TestCase):
             count = SimpleMoneyModel.objects.filter(price_currency=code).count()
             self.assertTrue(count == 1)
 
-    @pytest.mark.skipif(True, reason="We don't yet support querying with Money objects")
     def test_retrive(self):
         price = Money(100, "USD")
         SimpleMoneyModel.objects.create(name="one hundred dollars", price=price)
@@ -64,7 +64,6 @@ class MoneyFieldTestCase(TestCase):
         ent_same = SimpleMoneyModel.objects.get(pk=ent.id)
         self.assertEquals(ent_same.price, Money(10, "USD"))
 
-    @pytest.mark.skipif(True, reason="We don't yet support creation with Money objects")
     def test_retreive_and_update(self):
         created = SimpleMoneyModel.objects.create(name="one hundred dollars", price=Money(100, "USD"))
         created.save()
@@ -78,18 +77,20 @@ class MoneyFieldTestCase(TestCase):
         ent = SimpleMoneyModel.objects.filter(price__exact=Money(300, "USD")).get()
         self.assertEquals(ent.price, Money(300, "USD"))
 
-    @pytest.mark.skipif(True, reason="We don't yet support specifying Money as a default value")
     def test_defaults_as_money_objects(self):
-        ent = MoneyModelDefaultMoneyUSD.objects.create(name='0 USD')
+        ent = MoneyModelDefaultMoneyUSD.objects.create(name='123.45 USD')
+        self.assertEquals(ent.price, Money('123.45', 'USD'))
+
         ent = MoneyModelDefaultMoneyUSD.objects.get(pk=ent.id)
-        self.assertEquals(ent.price, Money(0, 'USD'))
+        self.assertEquals(ent.price, Money('123.45', 'USD'))
 
     def test_defaults_as_separate_values(self):
         ent = MoneyModelDefaults.objects.create(name='100 USD', price=100)
+        self.assertEquals(ent.price, Money(100, 'USD'))
+
         ent = MoneyModelDefaults.objects.get(pk=ent.id)
         self.assertEquals(ent.price, Money(100, 'USD'))
 
-    @pytest.mark.skipif(True, reason="We don't yet support querying with Money objects")
     def test_lookup(self):
         USD100 = Money(100, "USD")
         EUR100 = Money(100, "EUR")
@@ -141,8 +142,7 @@ class MoneyFieldTestCase(TestCase):
         self.assertEqual(qset.count(), 1)
         self.assertEqual(qset[0].price, UAH100+1)
 
-        #Less then or equal:
-
+        #Less than or equal:
         qset = SimpleMoneyModel.objects.filter(price__lte=USD100)
         self.assertEqual(qset.count(), 2)
         self.assertSameCurrency([ent.price for ent in qset], "USD")
@@ -182,26 +182,22 @@ class MoneyFieldTestCase(TestCase):
         e.price.from_string("BGN 5.0")
         self.assertEqual(e.price, Money(5, "BGN"))
 
-    @pytest.mark.skipif(True, reason="We don't yet support creation with Money objects")
     def test_price_attribute_in_constructor(self):
         e1 = SimpleMoneyModel(price=Money(100, "USD"))
         e2 = SimpleMoneyModel(price=Money(200, "JPY"))
         self.assertEqual(e1.price, Money(100, "USD"))
         self.assertEqual(e2.price, Money(200, "JPY"))
 
-    @pytest.mark.skipif(True, reason="We don't yet support creation with Money objects")
     def test_price_attribute_update(self):
         e2 = SimpleMoneyModel(price=Money(200, "JPY"))
         e2.price = Money(300, "USD")
         self.assertEqual(e2.price, Money(300, "USD"))
 
-    @pytest.mark.skipif(True, reason="We don't yet support creation with Money objects")
     def test_price_from_string(self):
         e2 = SimpleMoneyModel(price=Money(200, "JPY"))
         e2.price.from_string("USD 400")
         self.assertEqual(e2.price, Money(400, "USD"))
 
-    @pytest.mark.skipif(True, reason="We don't yet support creation with Money objects")
     def test_zero_edge_case(self):
         created = SimpleMoneyModel.objects.create(name="zero dollars", price=Money(0, "USD"))
         self.assertEquals(created.price, Money(0, "USD"))

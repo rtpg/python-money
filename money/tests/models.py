@@ -40,3 +40,63 @@ class MoneyModelDefaults(models.Model):
 
     class Meta:
         app_label = 'tests'
+
+
+# A parametrized way of testing the model defaults. The following are all
+# accetpable ways the field can be defined on a model
+class ParametrizedModel(models.Model):
+    """ The simplest possible declaration """
+    value = fields.MoneyField(max_digits=12, decimal_places=3)
+
+    def expected_value(self):
+        return Money('0', 'XXX')
+
+
+class ParametrizedDefaultAsZeroMoneyModel(models.Model):
+    """ The simplest possible declaration with a Money object """
+    value = fields.MoneyField(max_digits=12, decimal_places=3, default=Money(0, 'JPY'))
+
+    def expected_value(self):
+        return Money('0', 'JPY')
+
+
+class ParametrizedDefaultAsMoneyModel(models.Model):
+    """ The simplest possible declaration with a Money object """
+    value = fields.MoneyField(max_digits=12, decimal_places=3, default=Money(100, 'JPY'))
+
+    def expected_value(self):
+        return Money('100', 'JPY')
+
+
+class ParametrizedDefaultAsZeroModel(models.Model):
+    """ The simplest possible declaration with a zero default """
+    value = fields.MoneyField(max_digits=12, decimal_places=3, default=0)
+
+    def expected_value(self):
+        return Money('0', 'XXX')
+
+
+class ParametrizedDefaultAsValueModel(models.Model):
+    """ The simplest possible declaration with a non-zero default """
+    value = fields.MoneyField(max_digits=12, decimal_places=3, default=100)
+
+    def expected_value(self):
+        return Money('100', 'XXX')
+
+
+class ParametrizedDefaultAsValueWithCurrencyModel(models.Model):
+    """ The simplest possible declaration with a zero default """
+    value = fields.MoneyField(max_digits=12, decimal_places=3, default=0, default_currency='JPY')
+
+    def expected_value(self):
+        return Money('0', 'JPY')
+
+
+ALL_PARAMETRIZED_MODELS = [
+    ParametrizedModel,
+    ParametrizedDefaultAsZeroMoneyModel,
+    ParametrizedDefaultAsMoneyModel,
+    ParametrizedDefaultAsZeroModel,
+    ParametrizedDefaultAsValueModel,
+    ParametrizedDefaultAsValueWithCurrencyModel,
+]
