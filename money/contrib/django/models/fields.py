@@ -86,18 +86,19 @@ class MoneyField(InfiniteDecimalField):
     # to_python is called. We need our code there instead of subfieldBase
     #__metaclass__ = models.SubfieldBase
 
-    def __init__(self, verbose_name=None, name=None,
-                 max_digits=None, decimal_places=None,
-                 default=None, default_currency=None, blank=True, **kwargs):
+    def __init__(self, default_currency="", *args, **kwargs):
         # We add the currency field except when using frozen south orm. See introspection rules below.
+        default = kwargs.get("default", None)
+
         self.add_currency_field = not kwargs.pop('no_currency_field', False)
         if isinstance(default, Money):
-            self.default_currency = default.currency
-        self.default_currency = default_currency
-        super(MoneyField, self).__init__(verbose_name, name, max_digits, decimal_places, default=default, blank=blank, **kwargs)
+            self.default_currency = default.currency # use the default's currency
+        else:
+            self.default_currency = default_currency # use the kwarg passed in
 
 #    def get_internal_type(self):
 #         return "DecimalField"
+        super(MoneyField, self).__init__(*args, **kwargs)
 
     # Implementing to_python should not be needed because we are directly
     # assigning the attributes to the model with the proxy class. Some parts
