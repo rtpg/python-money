@@ -120,12 +120,18 @@ class MoneyField(InfiniteDecimalField):
     def contribute_to_class(self, cls, name):
         if self.add_currency_field and not cls._meta.abstract:
             c_field = CurrencyField(max_length=3, default=self.default_currency, editable=False)
-            c_field.creation_counter = self.creation_counter+1
+            # Use this field's creation counter for the currency field. This
+            # field will get a +1 when we call super
+            c_field.creation_counter = self.creation_counter
             cls.add_to_class(currency_field_name(name), c_field)
 
+        # Set ourselves up normally
         super(MoneyField, self).contribute_to_class(cls, name)
+
+        # As we are not using SubfieldBase, we need to set our proxy class here
         setattr(cls, self.name, MoneyFieldProxy(self))
 
+        # Set our custom manager
         if not hasattr(cls, '_default_manager'):
             from managers import MoneyManager
             cls.add_to_class('objects', MoneyManager())
