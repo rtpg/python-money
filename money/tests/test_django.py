@@ -3,6 +3,7 @@ import pytest
 from django.test import TestCase
 
 from money import Money, CURRENCY
+from money.contrib.django.models.fields import NotSupportedLookup
 from money.tests.models import (
     SimpleMoneyModel,
     MoneyModelDefaultMoneyUSD,
@@ -207,6 +208,10 @@ class MoneyFieldTestCase(TestCase):
 
         ent = SimpleMoneyModel.objects.filter(price__exact=Money(0, "USD")).get()
         self.assertEquals(ent.price, Money(0, "USD"))
+
+    def test_unsupported_lookup(self):
+        with pytest.raises(NotSupportedLookup):
+            SimpleMoneyModel.objects.filter(price__startswith='ABC')
 
 
 @pytest.mark.django_db

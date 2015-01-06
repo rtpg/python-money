@@ -11,11 +11,14 @@ currency_field_name = lambda name: "%s_currency" % name
 
 SUPPORTED_LOOKUPS = ('exact', 'lt', 'gt', 'lte', 'gte')
 
-class NotSupportedLookup(Exception):
+
+class NotSupportedLookup(TypeError):
     def __init__(self, lookup):
         self.lookup = lookup
+
     def __str__(self):
         return "Lookup '%s' is not supported for MoneyField" % self.lookup
+
 
 class MoneyFieldProxy(object):
     """
@@ -136,21 +139,19 @@ class MoneyField(InfiniteDecimalField):
         return self.get_db_prep_value(value, connection=connection, prepared=False)
 
     def get_prep_lookup(self, lookup_type, value):
+        """
+        Prepares the value for passing to the database when used in a lookup
+        (a WHERE constraint in SQL).
+
+        "Your method must be prepared to handle all of these lookup_type values
+        and should raise either a ValueError if the value is of the wrong sort
+        (a list when you were expecting an object, for example) or a TypeError
+        if your field does not support that type of lookup."
+
+        """
         if not lookup_type in SUPPORTED_LOOKUPS:
             raise NotSupportedLookup(lookup_type)
 
-        # Originally, this method was:
-        #
-        # value = self.get_db_prep_save(value)
-        # return super(MoneyField, self).get_prep_lookup(lookup_type, value)
-       
-        # But since Django 1.4,
-        # get_db_prep_save() needs a `connection` argument, which we don't
-        # get passed here. So just replicate the functionality of that
-        # method (and hope the subsequent 'super()' call (that we don't
-        # call either) doesn't do anything too important. This passes
-        # all the current tests, anyway.
-        
         if isinstance(value, Money):
             value = value.amount
         return super(MoneyField, self).get_prep_lookup(lookup_type, value)
