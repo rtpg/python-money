@@ -37,6 +37,7 @@ keywords = 'money currency finance'.split()
 
 tests_require = [
     'pytest-django',
+    'pytest-cov',
     'django<1.7',
 ]
 
