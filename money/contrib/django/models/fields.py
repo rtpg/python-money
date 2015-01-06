@@ -139,12 +139,17 @@ class MoneyField(InfiniteDecimalField):
             from managers import MoneyManager
             cls.add_to_class('objects', MoneyManager())
 
-    def get_db_prep_save(self, value, connection, *args, **kwargs):
+    def get_db_prep_save(self, value, *args, **kwargs):
+        """
+        Called when the Field value must be saved to the database. As the
+        default implementation just calls get_db_prep_value(), you shouldn't
+        need to implement this method unless your custom field needs a special
+        conversion when being saved that is not the same as the conversion used
+        for normal query parameters
+        """
         if isinstance(value, Money):
             value = value.amount
-
-        # override DecimalField's rounding
-        return self.get_db_prep_value(value, connection=connection, prepared=False)
+        return super(MoneyField, self).get_db_prep_save(value, *args, **kwargs)
 
     def get_prep_lookup(self, lookup_type, value):
         """
