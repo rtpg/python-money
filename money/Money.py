@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import exceptions
+
 from decimal import Decimal
+
 
 class Currency(object):
     code = "XXX"
@@ -38,12 +40,10 @@ CURRENCY = {}
 CURRENCY['XXX'] = Currency(code="XXX", numeric="999")
 DEFAULT_CURRENCY = CURRENCY['XXX']
 
-def set_default_currency(code="XXX"):
-    global DEFAULT_CURRENCY
-    DEFAULT_CURRENCY = CURRENCY[code]
 
 class IncorrectMoneyInputError(exceptions.Exception):
     """Invalid input for the Money object"""
+
 
 class CurrencyMismatchException(exceptions.ArithmeticError):
     """Raised when an operation is not allowed between differing currencies"""
@@ -197,35 +197,7 @@ class Money(object):
     def __ge__(self, other):
         return self > other or self == other
 
-    #
     # Miscellaneous helper methods
-    #
-
-    def convert_to_default(self):
-        return Money(amount = self.amount * self.currency.exchange_rate, currency=DEFAULT_CURRENCY)
-
-    def convert_to(self, currency):
-        """
-        Convert from one currency to another.
-        """
-        raise NotImplemented
-
-    def allocate(self, ratios):
-        """
-        Allocates a sum of money to several accounts.
-        """
-        total = sum(ratios)
-        remainder = self.amount
-        results = []
-        for i in range(0, len(ratios)):
-            results.append(Money(amount = self.amount * ratios[i] / total, currency = self.currency))
-            remainder -= results[i].amount
-        i = 0
-        while i < remainder:
-            results[i].amount += Decimal("0.01")
-            i += 1
-        return results
-
     def from_string(self, value):
         """
         Parses a properly formatted string and sets the instance to have the monetary
