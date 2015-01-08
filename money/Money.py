@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from __future__ import division
+
 import exceptions
 
 from decimal import Decimal
@@ -127,20 +129,24 @@ class Money(object):
         else:
             return Money(amount = self.amount*Decimal(str(other)), currency = self.currency)
 
-    def __div__(self, other):
+    def __truediv__(self, other):
         """
         We allow division by non-money numeric values but dividing by
         another Money value is undefined
         """
         if isinstance(other, Money):
             raise InvalidOperationException(u'Cannot divide two monetary quantities')
-        else:
-            return self.amount / Decimal(str(other))
+        return Money(amount=self.amount / other, currency=self.currency)
 
-    def __rdiv__(self, other):
-        return Decimal(str(other)) / self.amount
+    __div__ = __truediv__
 
+    def __floordiv__(self, other):
+        raise InvalidOperationException(u'Floor division not supported for monetary quantities')
 
+    def __rtruediv__(self, other):
+        raise InvalidOperationException(u'Cannot divide by monetary quantities')
+
+    __rdiv__ = __rtruediv__
     __radd__ = __add__
     __rmul__ = __mul__
 
