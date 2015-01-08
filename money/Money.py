@@ -57,7 +57,12 @@ class Money(object):
     amount = Decimal("0.0")
     currency = DEFAULT_CURRENCY
 
-    def __init__ (self, amount=None, currency=None):
+    def _currency_check(self, other):
+        """ Compare the currencies matches and raise if not """
+        if self.currency != other.currency:
+            raise CurrencyMismatchException(u"Currency mismatch: %s != %s" % (self.currency, other.currency,))
+
+    def __init__(self, amount=None, currency=None):
         if not amount:
             amount = Decimal('0.0')
 
@@ -96,29 +101,23 @@ class Money(object):
 
     def __add__(self, other):
         if isinstance(other, Money):
-            if self.currency == other.currency:
-                return Money(amount = self.amount + other.amount, currency = self.currency)
-            else:
-                raise CurrencyMismatchException(u"Cannot add value with currency of %s to value with currency of %s" % (self.currency, other.currency,))
+            self._currency_check(other)
+            return Money(amount=self.amount + other.amount, currency=self.currency)
         else:
             return Money(amount = self.amount + Decimal(str(other)), currency = self.currency)
 
     def __sub__(self, other):
         if isinstance(other, Money):
-            if self.currency == other.currency:
-                return Money(amount = self.amount - other.amount, currency = self.currency)
-            else:
-                raise CurrencyMismatchException(u"Cannot subtract value with currency of %s from value with currency of %s" % (self.currency, other.currency,))
+            self._currency_check(other)
+            return Money(amount=self.amount - other.amount, currency=self.currency)
         else:
             # TODO: Should we allow this operation?
             return Money(amount = self.amount - Decimal(str(other)), currency = self.currency)
 
     def __rsub__(self, other):
         if isinstance(other, Money):
-            if self.currency == other.currency:
-                return Money(amount = other.amount - self.amount, currency = self.currency)
-            else:
-                raise CurrencyMismatchException(u"Cannot subtract value with currency of %s from value with currency of %s" % (self.currency, other.currency,))
+            self._currency_check(other)
+            return Money(amount=other.amount - self.amount, currency=self.currency)
         else:
             # TODO: Should we allow this operation?
             return Money(amount = self.amount - Decimal(str(other)), currency = self.currency)
@@ -176,19 +175,15 @@ class Money(object):
 
     def __lt__(self, other):
         if isinstance(other, Money):
-            if (self.currency == other.currency):
-                return (self.amount < other.amount)
-            else:
-                raise CurrencyMismatchException(u'Cannot compare %s to %s' % (self.currency, other.currency))
+            self._currency_check(other)
+            return (self.amount < other.amount)
         else:
             return (self.amount < Decimal(str(other)))
 
     def __gt__(self, other):
         if isinstance(other, Money):
-            if (self.currency == other.currency):
-                return (self.amount > other.amount)
-            else:
-                raise CurrencyMismatchException(u'Cannot compare %s to %s' % (self.currency, other.currency))
+            self._currency_check(other)
+            return (self.amount > other.amount)
         else:
             return (self.amount > Decimal(str(other)))
 
