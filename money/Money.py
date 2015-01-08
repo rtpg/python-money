@@ -141,17 +141,6 @@ class Money(object):
     def __rdiv__(self, other):
         return Decimal(str(other)) / self.amount
 
-    def __rmod__(self, other):
-        """
-        Calculate percentage of an amount.  The left-hand side of the operator must be a numeric value.  E.g.:
-        >>> money = Money.Money(200, "USD")
-        >>> 5 % money
-        USD 10.00
-        """
-        if isinstance(other, Money):
-            raise InvalidOperationException('invalid monetary operation')
-        else:
-            return Money(amount = Decimal(str(other)) * self.amount / 100, currency = self.currency)
 
     __radd__ = __add__
     __rmul__ = __mul__
