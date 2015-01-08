@@ -86,14 +86,17 @@ class Money(object):
         if not isinstance(currency, Currency):
             self.currency = CURRENCY[str(currency).upper()]
 
+    def __str__(self):
+        return "{} {}".format(self.currency, self.amount)
+
     def __unicode__(self):
-        return unicode(self.amount)
+        return u"{} {}".format(self.currency, self.amount)
+
+    def __repr__(self):
+        return str(self)
 
     def __float__(self):
         return float(self.amount)
-
-    def __repr__(self):
-        return '%s %5.2f' % (self.currency, self.amount)
 
     def __pos__(self):
         return Money(amount=self.amount, currency=self.currency)
