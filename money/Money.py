@@ -128,8 +128,7 @@ class Money(object):
     def __mul__(self, other):
         if isinstance(other, Money):
             raise InvalidOperationException(u'Cannot multiply monetary quantities')
-        else:
-            return Money(amount = self.amount*Decimal(str(other)), currency = self.currency)
+        return Money(amount=self.amount*Decimal(str(other)), currency=self.currency)
 
     def __truediv__(self, other):
         """
