@@ -48,7 +48,8 @@ class IncorrectMoneyInputError(exceptions.Exception):
 class CurrencyMismatchException(exceptions.ArithmeticError):
     """Raised when an operation is not allowed between differing currencies"""
 
-class InvalidOperationException(exceptions.ArithmeticError):
+
+class InvalidOperationException(TypeError):
     """Raised when an operation is never allowed"""
 
 
