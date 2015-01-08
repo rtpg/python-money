@@ -179,6 +179,21 @@ The value you get from your model will be a `Money` class:
     USD  199.99
 
 
+### User Defined Precision of Decimals in Postgres
+
+It can be difficult to represent decimals exactly as the user entered them with
+django. If you use postgres, you can preserve the user's entered precision by
+using the Postgresql `numeric` type. Simply use the `InfiniteDecimalField`
+class and the value will be stored as entered by the user without having to
+define the precision in the model class.
+
+    InfiniteDecimalField
+
+This allows you to store and later retreive a values like `3`, `3.0`, and
+`3.000` without losing the precision. The `MoneyField` class already extends this
+by default.
+
+
 ### Fixtures
 
 When loading from or searializing to fixtures, the field class expects the values

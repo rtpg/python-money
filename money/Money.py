@@ -109,15 +109,14 @@ class Money(object):
             self._currency_check(other)
             return Money(amount=self.amount + other.amount, currency=self.currency)
         else:
-            return Money(amount = self.amount + Decimal(str(other)), currency = self.currency)
+            return Money(amount=self.amount + Decimal(str(other)), currency=self.currency)
 
     def __sub__(self, other):
         if isinstance(other, Money):
             self._currency_check(other)
             return Money(amount=self.amount - other.amount, currency=self.currency)
         else:
-            # TODO: Should we allow this operation?
-            return Money(amount = self.amount - Decimal(str(other)), currency = self.currency)
+            return Money(amount=self.amount - Decimal(str(other)), currency=self.currency)
 
     def __rsub__(self, other):
         if isinstance(other, Money):
@@ -150,12 +149,11 @@ class Money(object):
         raise InvalidOperationException(u'Cannot divide by monetary quantities')
 
     __rdiv__ = __rtruediv__
+
+    # Communative operations
     __radd__ = __add__
     __rmul__ = __mul__
 
-    #
-    # Override comparison operators
-    #
     # Boolean
     def __bool__(self):
         if self.amount != 0:
@@ -165,6 +163,7 @@ class Money(object):
 
     __nonzero__ = __bool__
 
+    # Comparison operators
     def __eq__(self, other):
         if isinstance(other, Money):
             return (self.amount == other.amount) and (self.currency == other.currency)
@@ -202,8 +201,9 @@ class Money(object):
     # Miscellaneous helper methods
     def from_string(self, value):
         """
-        Parses a properly formatted string and sets the instance to have the monetary
-        value and currency
+        Parses a properly formatted string and sets the instance to have the
+        monetary value and currency. The string should be formatted as given by
+        the repr function: 'USD 123.45'
         """
         self.amount, self.currency = self._from_string(value)
 
@@ -226,7 +226,6 @@ class Money(object):
 # Symbols: http://www.xe.com/symbols.php
 #
 # Note that the decimal code of N/A has been mapped to None
-
 CURRENCY['AED'] = Currency(code='AED', numeric='784', decimals=2, symbol=u'', name=u'UAE Dirham', countries=[u'UNITED ARAB EMIRATES'])
 CURRENCY['AFN'] = Currency(code='AFN', numeric='971', decimals=2, symbol=u'؋', name=u'Afghani', countries=[u'AFGHANISTAN'])
 CURRENCY['ALL'] = Currency(code='ALL', numeric='008', decimals=2, symbol=u'Lek', name=u'Lek', countries=[u'ALBANIA'])
