@@ -119,8 +119,7 @@ class Money(object):
             self._currency_check(other)
             return Money(amount=other.amount - self.amount, currency=self.currency)
         else:
-            # TODO: Should we allow this operation?
-            return Money(amount = self.amount - Decimal(str(other)), currency = self.currency)
+            return Money(amount=Decimal(str(other) - self.amount), currency=self.currency)
 
     def __mul__(self, other):
         if isinstance(other, Money):
