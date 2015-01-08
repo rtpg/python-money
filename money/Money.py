@@ -156,6 +156,15 @@ class Money(object):
     #
     # Override comparison operators
     #
+    # Boolean
+    def __bool__(self):
+        if self.amount != 0:
+            return True
+        else:
+            return False
+
+    __nonzero__ = __bool__
+
     def __eq__(self, other):
         if isinstance(other, Money):
             return (self.amount == other.amount) and (self.currency == other.currency)
