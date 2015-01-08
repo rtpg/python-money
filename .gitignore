@@ -1,3 +1,7 @@
+.coverage
+coverage.xml
+htmlcov
+
 bin
 build
 dist

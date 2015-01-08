@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils.encoding import smart_unicode
 from django.utils.translation import ugettext_lazy as _
+
 from money.contrib.django import forms
 from money import Money
 
@@ -11,21 +12,27 @@ currency_field_name = lambda name: "%s_currency" % name
 
 SUPPORTED_LOOKUPS = ('exact', 'lt', 'gt', 'lte', 'gte')
 
-class NotSupportedLookup(Exception):
+
+class NotSupportedLookup(TypeError):
     def __init__(self, lookup):
         self.lookup = lookup
+
     def __str__(self):
         return "Lookup '%s' is not supported for MoneyField" % self.lookup
 
+
 class MoneyFieldProxy(object):
     """
-    An equivalent to Django's default attribute descriptor class (enabled via
-    the SubfieldBase metaclass, see module doc for details). However, instead
-    of callig to_python() on our MoneyField class, it stores the two
-    different parts separately, and updates them whenever something is assigned.
-    If the attribute is read, it builds the instance "on-demand" with the
-    current data.
-    (see: http://blog.elsdoerfer.name/2008/01/08/fuzzydates-or-one-django-model-field-multiple-database-columns/)
+    An equivalent to Django's default attribute descriptor class SubfieldBase
+    (normally enabled via `__metaclass__ = models.SubfieldBase` on the custom
+    Field class).
+
+    Instead of calling to_python() on our MoneyField class as SubfieldBase
+    does, it stores the two different parts separately, and updates them
+    whenever something is assigned. If the attribute is read, it builds the
+    instance "on-demand" with the current data.
+
+    See: http://blog.elsdoerfer.name/2008/01/08/fuzzydates-or-one-django-model-field-multiple-database-columns/
     """
     def __init__(self, field):
         self.field = field
@@ -46,7 +53,8 @@ class MoneyFieldProxy(object):
             obj.__dict__[self.field.name] = value.amount
             setattr(obj, self.currency_field_name, smart_unicode(value.currency))
         else:
-            if value: value = str(value)
+            if value:
+                value = str(value)
             obj.__dict__[self.field.name] = self.field.to_python(value)
 
 
@@ -83,18 +91,17 @@ class MoneyField(InfiniteDecimalField):
     # to_python is called. We need our code there instead of subfieldBase
     #__metaclass__ = models.SubfieldBase
 
-    def __init__(self, verbose_name=None, name=None,
-                 max_digits=None, decimal_places=None,
-                 default=None, default_currency=None, blank=True, **kwargs):
+    def __init__(self, default_currency="", *args, **kwargs):
         # We add the currency field except when using frozen south orm. See introspection rules below.
+        default = kwargs.get("default", None)
+
         self.add_currency_field = not kwargs.pop('no_currency_field', False)
         if isinstance(default, Money):
-            self.default_currency = default.currency
-        self.default_currency = default_currency
-        super(MoneyField, self).__init__(verbose_name, name, max_digits, decimal_places, default=default, blank=blank, **kwargs)
+            self.default_currency = default.currency # use the default's currency
+        else:
+            self.default_currency = default_currency # use the kwarg passed in
 
-#    def get_internal_type(self):
-#         return "DecimalField"
+        super(MoneyField, self).__init__(*args, **kwargs)
 
     # Implementing to_python should not be needed because we are directly
     # assigning the attributes to the model with the proxy class. Some parts
@@ -116,41 +123,48 @@ class MoneyField(InfiniteDecimalField):
     def contribute_to_class(self, cls, name):
         if self.add_currency_field and not cls._meta.abstract:
             c_field = CurrencyField(max_length=3, default=self.default_currency, editable=False)
-            c_field.creation_counter = self.creation_counter+1
+            # Use this field's creation counter for the currency field. This
+            # field will get a +1 when we call super
+            c_field.creation_counter = self.creation_counter
             cls.add_to_class(currency_field_name(name), c_field)
 
+        # Set ourselves up normally
         super(MoneyField, self).contribute_to_class(cls, name)
+
+        # As we are not using SubfieldBase, we need to set our proxy class here
         setattr(cls, self.name, MoneyFieldProxy(self))
 
+        # Set our custom manager
         if not hasattr(cls, '_default_manager'):
             from managers import MoneyManager
             cls.add_to_class('objects', MoneyManager())
 
-    def get_db_prep_save(self, value, connection, *args, **kwargs):
-        # added 'connection' argument so Django 1.4 doesn't throw
-        # a wobbly.
+    def get_db_prep_save(self, value, *args, **kwargs):
+        """
+        Called when the Field value must be saved to the database. As the
+        default implementation just calls get_db_prep_value(), you shouldn't
+        need to implement this method unless your custom field needs a special
+        conversion when being saved that is not the same as the conversion used
+        for normal query parameters
+        """
         if isinstance(value, Money):
             value = value.amount
-
-        # override DecimalField's rounding
-        return self.get_db_prep_value(value, connection=connection, prepared=False)
+        return super(MoneyField, self).get_db_prep_save(value, *args, **kwargs)
 
     def get_prep_lookup(self, lookup_type, value):
+        """
+        Prepares the value for passing to the database when used in a lookup
+        (a WHERE constraint in SQL).
+
+        "Your method must be prepared to handle all of these lookup_type values
+        and should raise either a ValueError if the value is of the wrong sort
+        (a list when you were expecting an object, for example) or a TypeError
+        if your field does not support that type of lookup."
+
+        """
         if not lookup_type in SUPPORTED_LOOKUPS:
             raise NotSupportedLookup(lookup_type)
 
-        # Originally, this method was:
-        #
-        # value = self.get_db_prep_save(value)
-        # return super(MoneyField, self).get_prep_lookup(lookup_type, value)
-       
-        # But since Django 1.4,
-        # get_db_prep_save() needs a `connection` argument, which we don't
-        # get passed here. So just replicate the functionality of that
-        # method (and hope the subsequent 'super()' call (that we don't
-        # call either) doesn't do anything too important. This passes
-        # all the current tests, anyway.
-        
         if isinstance(value, Money):
             value = value.amount
         return super(MoneyField, self).get_prep_lookup(lookup_type, value)
@@ -168,7 +182,7 @@ class MoneyField(InfiniteDecimalField):
         will get called to output itself
         """
         value = self._get_val_from_obj(obj)
-        return  value.amount
+        return value.amount
 
     def formfield(self, **kwargs):
         defaults = {'form_class': forms.MoneyField}
@@ -190,7 +204,8 @@ try:
     add_introspection_rules(
         patterns=["^money\.contrib\.django.\models\.fields\.MoneyField"],
         rules=[
-            (   (MoneyField,),
+            (
+                (MoneyField,),
                 [],
                 {'no_currency_field': ('add_currency_field', {})}
             )
