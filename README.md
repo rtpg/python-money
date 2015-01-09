@@ -5,6 +5,21 @@ python-money
 Primitives for working with money and currencies in Python
 
 
+Compatibility
+=============
+
+This fork of python-money (rooted at poswald/python-money) is significantly
+different than other versions in the family tree. If you plan on using it,
+please be aware that it most likely won't be a drop-in replacement.
+
+We have made several changes to be more conservative about operations,
+remove implicit conversion of currency, remove global state, added a
+postgres specific field, and a `py.test` based test suite among other changes.
+
+You are free to use this version but please look at other forks as well as they
+may better suit your use case.
+
+
 Installation
 ============
 
@@ -13,6 +28,7 @@ You can install this project directly from the git repository using pip:
     $ pip install -e git+http://github.com/poswald/python-money.git@0.0.1#egg=python-money
 
 You do not have to specify the version number but it might be a good idea.
+
 
 Usage
 =====
@@ -163,6 +179,21 @@ The value you get from your model will be a `Money` class:
     USD  199.99
 
 
+### User Defined Precision of Decimals in Postgres
+
+It can be difficult to represent decimals exactly as the user entered them with
+django. If you use postgres, you can preserve the user's entered precision by
+using the Postgresql `numeric` type. Simply use the `InfiniteDecimalField`
+class and the value will be stored as entered by the user without having to
+define the precision in the model class.
+
+    InfiniteDecimalField
+
+This allows you to store and later retreive a values like `3`, `3.0`, and
+`3.000` without losing the precision. The `MoneyField` class already extends this
+by default.
+
+
 ### Fixtures
 
 When loading from or searializing to fixtures, the field class expects the values
@@ -184,22 +215,17 @@ You may wish to examine the tests for an example
 
 ### Form Field
 
-The form field used by the `models.MoneyField` is also called `MoneyField` in
+The form field used by the `models.MoneyField` is also called `MoneyField`
 
 
 ### Running Tests
 
-The test suite requires `nose`, `django` and `django_nose` to be installed. They
-will be downloaded and installed automatically when run.
+The test suite requires `py.test`, `django` and several other libaries to be
+installed. They will be downloaded and installed automatically when run.
 
 Tests can be run via the `setup.py` script:
 
     $ python setup.py test
-
-or directly via the runscripts command. This can be usefull for passing
-addtional options to nose:
-
-    $ python money/runtests.py
 
 If you wish to contribute code, please run these tests to ensure nothing breaks.
 
@@ -209,17 +235,14 @@ TODO
 
 * Add more currency symbols to Currency class
 * Add number of decimal places to all Currencies. Who wants to help? :-)
-* Change the addition operation so that it raises an Exception rather
-than implicitly convert the value
-* Add a convert method to explicitly convert using the exchange rate.
-* Division of money should probably raise a custom error instead of assert on currency mismatch
-* Division of `Money` should return `Money` instead of `Decimal` type
 
 CHANGELOG
 ===
 
 * Version 0.2.0
-    - Fixed an issue with the South introspection rule for MoneyField similar to [ South #327](http://south.aeracode.org/ticket/327) You will probably need to generate a new schema migration if you are upgrading.
+    - Fixed an issue with the South introspection rule for MoneyField similar
+    to [ South #327](http://south.aeracode.org/ticket/327) You will probably
+    need to generate a new schema migration if you are upgrading.
 
 * Version 0.1.0
     - Initial version
