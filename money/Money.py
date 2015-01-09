@@ -12,7 +12,6 @@ class Currency(object):
     countries = []
     name = ""
     numeric = "999"
-    exchange_rate = Decimal("1.0")
 
     def __init__(self, code="", numeric="999", name="", symbol=u"", decimals=2, countries=[]):
         self.code = code
@@ -33,10 +32,6 @@ class Currency(object):
     def __ne__(self, other):
         return not self.__eq__(other)
 
-    def set_exchange_rate(self, rate):
-        if not isinstance(rate, Decimal):
-            rate = Decimal(str(rate))
-        self.exchange_rate = rate
 
 CURRENCY = {}
 CURRENCY['XXX'] = Currency(code="XXX", numeric="999")
