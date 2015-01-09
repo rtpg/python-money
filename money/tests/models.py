@@ -31,9 +31,9 @@ class MoneyModelDefaultMoneyUSD(models.Model):
 
 
 class MoneyModelDefaults(models.Model):
-    name = models.CharField(max_length=100)
-    price = fields.MoneyField(max_digits=12, decimal_places=3, default="123.45", default_currency="USD")
-    zero = fields.MoneyField(max_digits=12, decimal_places=3, default="0", default_currency="USD")
+    name = models.CharField('Name', max_length=100)
+    price = fields.MoneyField('Price', max_digits=12, decimal_places=3, default="123.45", default_currency="USD")
+    zero = fields.MoneyField('Zero', max_digits=12, decimal_places=3, default="0", default_currency="USD")
 
     def __unicode__(self):
         return self.name + u" " + unicode(self.price)

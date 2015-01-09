@@ -198,6 +198,28 @@ class MoneyFieldTestCase(TestCase):
         e2.price.from_string("USD 400")
         self.assertEqual(e2.price, Money(400, "USD"))
 
+    def test_price_amount_to_string(self):
+        e1 = SimpleMoneyModel(price=Money('200', 'JPY'))
+        e2 = SimpleMoneyModel(price=Money('200.0', 'JPY'))
+
+        self.assertEqual(str(e1.price), "JPY 200")
+        self.assertEqual(unicode(e1.price), "JPY 200")
+
+        self.assertEqual(str(e1.price.amount), "200")
+        self.assertEqual(unicode(e1.price.amount), "200")
+
+        self.assertEqual(str(e2.price.amount), "200.0")
+        self.assertEqual(unicode(e2.price.amount), "200.0")
+
+    def test_price_amount_to_string_non_money(self):
+        e1 = MoneyModelDefaults()
+
+        self.assertEqual(str(e1.price), "USD 123.45")
+        self.assertEqual(unicode(e1.price), "USD 123.45")
+
+        self.assertEqual(str(e1.price.amount), "123.45")
+        self.assertEqual(unicode(e1.price.amount), "123.45")
+
     def test_zero_edge_case(self):
         created = SimpleMoneyModel.objects.create(name="zero dollars", price=Money(0, "USD"))
         self.assertEquals(created.price, Money(0, "USD"))

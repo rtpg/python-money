@@ -1,9 +1,4 @@
-{% if price %}
-	You input: {{ price }}
-{% else %}
-	<form method="POST">
-		<table>{{ form }}</table>
-		<input type="submit" value="Send">
-	</form>
-{% endif %}
-
+<form method="POST">
+	{{ form }}
+	<input type="submit" value="Submit">
+</form>
