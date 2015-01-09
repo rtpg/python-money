@@ -22,6 +22,7 @@ INSTALLED_APPS = (
 
 SECRET_KEY = 'abcde12345'
 
+ROOT_URLCONF = 'money.tests.urls'
 
 CACHES = {
     # No cache
