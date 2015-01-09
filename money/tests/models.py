@@ -92,6 +92,14 @@ class ParametrizedDefaultAsValueWithCurrencyModel(models.Model):
         return Money('0', 'JPY')
 
 
+class ParametrizedDefaultAsValueWithCurrencyAndLabelModel(models.Model):
+    """ The simplest possible declaration with a zero default and a label """
+    value = fields.MoneyField('Value', max_digits=12, decimal_places=3, default=0, default_currency='JPY')
+
+    def expected_value(self):
+        return Money('0', 'JPY')
+
+
 ALL_PARAMETRIZED_MODELS = [
     ParametrizedModel,
     ParametrizedDefaultAsZeroMoneyModel,
@@ -99,4 +107,5 @@ ALL_PARAMETRIZED_MODELS = [
     ParametrizedDefaultAsZeroModel,
     ParametrizedDefaultAsValueModel,
     ParametrizedDefaultAsValueWithCurrencyModel,
+    ParametrizedDefaultAsValueWithCurrencyAndLabelModel,
 ]

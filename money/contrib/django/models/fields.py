@@ -91,9 +91,10 @@ class MoneyField(InfiniteDecimalField):
     # to_python is called. We need our code there instead of subfieldBase
     #__metaclass__ = models.SubfieldBase
 
-    def __init__(self, default_currency="", *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         # We add the currency field except when using frozen south orm. See introspection rules below.
         default = kwargs.get("default", None)
+        default_currency = kwargs.pop("default_currency", "")
 
         self.add_currency_field = not kwargs.pop('no_currency_field', False)
         if isinstance(default, Money):
