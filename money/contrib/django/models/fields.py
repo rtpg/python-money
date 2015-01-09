@@ -67,6 +67,21 @@ class InfiniteDecimalField(models.DecimalField):
 
         return super(InfiniteDecimalField, self).db_type(connection=connection)
 
+    def get_db_prep_save(self, value, *args, **kwargs):
+        """
+        Called when the Field value must be saved to the database. As the
+        default implementation just calls get_db_prep_value(), you shouldn't
+        need to implement this method unless your custom field needs a special
+        conversion when being saved that is not the same as the conversion used
+        for normal query parameters
+        """
+
+        # The superclass DecimalField get_db_prep_save will add decimals up to
+        # the precision in the field definition. The point of this class is to
+        # use the user-specified precision up to that limit instead. For that
+        # reason we will call get_db_prep_value instead
+        return self.get_db_prep_value(value, *args, **kwargs)
+
 
 class CurrencyField(models.CharField):
     """
@@ -150,6 +165,7 @@ class MoneyField(InfiniteDecimalField):
         """
         if isinstance(value, Money):
             value = value.amount
+
         return super(MoneyField, self).get_db_prep_save(value, *args, **kwargs)
 
     def get_prep_lookup(self, lookup_type, value):
