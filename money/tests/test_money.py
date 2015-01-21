@@ -1,7 +1,14 @@
 from decimal import Decimal
 from unittest import TestCase
 
-from money import Money, CURRENCY, CurrencyMismatchException, InvalidOperationException
+from money import (
+    Money,
+    CURRENCY,
+    Currency,
+    CurrencyMismatchException,
+    InvalidOperationException,
+    IncorrectMoneyInputError,
+)
 
 
 class MoneyTestCase(TestCase):
@@ -60,6 +67,41 @@ class MoneyTestCase(TestCase):
 
         result = Money('-10.50')
         self.assertEqual(result.amount, Decimal("-10.50"))
+
+    def test_creation_unspecified_amount(self):
+        """
+        Same thing as above but with the unspecified 'xxx' currency        """
+
+        result = Money(currency='USD')
+        self.assertEqual(result.amount, 0)
+        self.assertEqual(result.currency.code, 'USD')
+
+    def test_creation_internal_types(self):
+        curr = Currency(code='AAA', name=u'My Currency')
+        result = Money(Decimal('777'), currency=curr)
+        self.assertEqual(result.amount, Decimal("777"))
+        self.assertEqual(result.currency.code, 'AAA')
+        self.assertEqual(result.currency.name, 'My Currency')
+
+    def test_creation_parsed(self):
+        result = Money('XXX -10.50')
+        self.assertEqual(result.amount, Decimal("-10.50"))
+        self.assertEqual(result.currency.code, 'XXX')
+
+        result = Money('USD -11.50')
+        self.assertEqual(result.amount, Decimal("-11.50"))
+        self.assertEqual(result.currency.code, 'USD')
+
+        result = Money('JPY -12.50')
+        self.assertEqual(result.amount, Decimal("-12.50"))
+        self.assertEqual(result.currency.code, 'JPY')
+
+    def test_creation_parsed_conflicting(self):
+        # currency declaration two ways
+        self.assertRaises(IncorrectMoneyInputError, lambda: Money('USD 123', 'JPY'))
+
+    def test_creation_parsed_malformed(self):
+        self.assertRaises(IncorrectMoneyInputError, lambda: Money('USD 123 USD'))
 
     def test_equality(self):
         ten_bucks = Money(10, 'USD')
