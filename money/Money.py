@@ -53,8 +53,35 @@ class InvalidOperationException(TypeError):
 
 
 class Money(object):
-    amount = Decimal('0')
-    currency = DEFAULT_CURRENCY
+    """
+    An amount of money with an optional currency
+
+    Pass in the amount and currency during initialization. Amounts will be
+    represented as Decimals internally.
+
+    The following are supported:
+
+        Money()                 # XXX 0
+        Money(123)              # XXX 123
+        Money('123.00')         # XXX 123.00
+        Money('123.00', 'USD')  # XXX 123.00
+        Money('123.00', 'USD')  # USD 123.00
+        Money('123', 'JPY')     # JPY 123
+        Money('123.0', 'JPY')   # JPY 123.0
+
+        # Parsed string
+        Money('USD 123.00')     # USD 123.00
+
+        # Decimal
+        Money(Decimal('123.0'), 'JPY')   # JPY 123.0
+
+        # kwargs
+        Money(amount='123.0', currency='JPY')   # JPY 123.0
+
+        # native types
+        Money(Decimal('123.0'), Currency(code='AAA', name=u'My Currency')  # AAA 123.0
+
+    """
 
     def _currency_check(self, other):
         """ Compare the currencies matches and raise if not """
@@ -62,26 +89,34 @@ class Money(object):
             raise CurrencyMismatchException(u"Currency mismatch: %s != %s" % (self.currency, other.currency,))
 
     def __init__(self, amount=None, currency=None):
-        if not amount:
-            amount = Decimal('0')
-
-        # force our input to the correct types or blow up trying
-        if isinstance(amount, str):
-            amt, curr = self._from_string(amount)
-            # TODO: detect an error case like Money("USD 123.45", 'JPY')
-            self.amount = amt
+        if isinstance(amount, Decimal):
+            self.amount = amount
         else:
             try:
-                self.amount = Decimal(amount)
+                self.amount = Decimal(amount or 0)
             except:
-                raise IncorrectMoneyInputError("Cannot initialize with amount %s" % amount)
+                # Decimal couldn't initialize it..
+                try:
+                    # check for the odd case of Money("USD 123.00", "JPY")
+                    if currency:
+                        raise IncorrectMoneyInputError(
+                            "Initialized with conflicting currencies %s %s"
+                            % currency.code, self.amount)
 
+                    self.amount, currency = self._from_string(amount)
+                except:
+                    raise IncorrectMoneyInputError("Cannot initialize with amount %s" % amount)
+
+        # at this point we have amount and possibly a currency
         if not currency:
             currency = DEFAULT_CURRENCY
-        self.currency = currency
 
         if not isinstance(currency, Currency):
-            self.currency = CURRENCY[str(currency).upper()]
+            currency = CURRENCY[str(currency).upper()]
+
+        self.currency = currency
+        assert isinstance(self.amount, Decimal)
+        assert isinstance(self.currency, Currency)
 
     def __str__(self):
         return "{} {}".format(self.currency, self.amount)
