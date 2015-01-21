@@ -13,7 +13,9 @@ class Currency(object):
     name = ""
     numeric = "999"
 
-    def __init__(self, code="", numeric="999", name="", symbol=u"", decimals=2, countries=[]):
+    def __init__(self, code="", numeric="999", name="", symbol=u"", decimals=2, countries=None):
+        if not countries:
+            countries = []
         self.code = code
         self.numeric = numeric
         self.name = name
