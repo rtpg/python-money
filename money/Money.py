@@ -53,7 +53,7 @@ class InvalidOperationException(TypeError):
 
 
 class Money(object):
-    amount = Decimal("0.0")
+    amount = Decimal('0')
     currency = DEFAULT_CURRENCY
 
     def _currency_check(self, other):
@@ -63,7 +63,7 @@ class Money(object):
 
     def __init__(self, amount=None, currency=None):
         if not amount:
-            amount = Decimal('0.0')
+            amount = Decimal('0')
 
         # force our input to the correct types or blow up trying
         if isinstance(amount, str):
