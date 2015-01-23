@@ -34,6 +34,13 @@ class MoneyFieldTestCase(TestCase):
             count = SimpleMoneyModel.objects.filter(price_currency=code).count()
             self.assertTrue(count == 1)
 
+    def test_price_from_string(self):
+        price1 = Money("400", "USD")
+        price2 = Money.from_string("USD 400")
+        self.assertEqual(price1, price2)
+        self.assertEqual(price1.amount, price2.amount)
+        self.assertEqual(price1.currency, price2.currency)
+
     def test_retrive(self):
         price = Money(100, "USD")
         SimpleMoneyModel.objects.create(name="one hundred dollars", price=price)
@@ -179,7 +186,7 @@ class MoneyFieldTestCase(TestCase):
         e.price = Money(0, "BGN")
         e.price.amount = 3
         self.assertEqual(e.price, Money(3, "BGN"))
-        e.price.from_string("BGN 5.0")
+        e.price = Money.from_string("BGN 5.0")
         self.assertEqual(e.price, Money(5, "BGN"))
 
     def test_price_attribute_in_constructor(self):
@@ -192,11 +199,6 @@ class MoneyFieldTestCase(TestCase):
         e2 = SimpleMoneyModel(price=Money(200, "JPY"))
         e2.price = Money(300, "USD")
         self.assertEqual(e2.price, Money(300, "USD"))
-
-    def test_price_from_string(self):
-        e2 = SimpleMoneyModel(price=Money(200, "JPY"))
-        e2.price.from_string("USD 400")
-        self.assertEqual(e2.price, Money(400, "USD"))
 
     def test_price_amount_to_string(self):
         e1 = SimpleMoneyModel(price=Money('200', 'JPY'))
