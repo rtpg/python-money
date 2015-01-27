@@ -1,15 +1,15 @@
-from django.conf.urls import *
+from django.conf.urls import patterns, url
 
 from money.tests.views import *
 
 urlpatterns = patterns(
     '',
-    ('^instance-view/$', instance_view),
-    ('^model-view/$', model_view),
-    ('^model-save-view/$', model_save_view),
-    ('^model-form-view/$', model_form_view),
+    url(r'^instance-view/$', instance_view),
+    url(r'^model-view/$', model_view),
+    url(r'^model-save-view/$', model_save_view),
+    url(r'^model-form-view/(?P<amount>\S+)/(?P<currency>\S+)/$', model_form_view),
 
-    ('^regular_form/$', regular_form),
-    ('^regular_form/(?P<id>\d+)/$', regular_form_edit),
-    ('^model_form/(?P<id>\d+)/$', model_form_edit),
+    url(r'^regular_form/$', regular_form),
+    url(r'^regular_form/(?P<id>\d+)/$', regular_form_edit),
+    url(r'^model_form/(?P<id>\d+)/$', model_form_edit),
 )

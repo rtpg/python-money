@@ -51,18 +51,26 @@ class TestEditView(TestCase):
         self.client = Client()
 
     def test_form_GET(self):
-        url = reverse(model_form_view)
+        url = reverse(model_form_view, kwargs={'amount': '987.00', 'currency': 'JPY'})
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
         self.assertContains(response, 'value="987.00"')
         self.assertContains(response, '<option value="JPY" selected="selected">JPY - Yen</option>')
 
+    def test_form_GET_zero(self):
+        url = reverse(model_form_view, kwargs={'amount': '0.0', 'currency': 'JPY'})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+        self.assertContains(response, 'value="0.0"')
+        self.assertContains(response, '<option value="JPY" selected="selected">JPY - Yen</option>')
+
     def test_form_POST(self):
-        url = reverse(model_form_view)
+        url = reverse(model_form_view, kwargs={'amount': '555.5', 'currency': 'JPY'})
 
         # We intentionally use decimals with a typically non-decimal currency
-        self.client.post(url, {
+        response = self.client.post(url, {
             'name': 'ABC',
             'price_0': '555.5',
             'price_1': 'JPY',
@@ -70,5 +78,7 @@ class TestEditView(TestCase):
 
         # Find the object we created...
         obj = SimpleMoneyModel.objects.last()
-        print "obj", obj, "obj.price", obj.price
         self.assertEqual(unicode(obj.price), u"JPY 555.5")
+
+        self.assertContains(response, '|item:name|value:ABC|')
+        self.assertContains(response, '|item:price|value:JPY 555.5|')
