@@ -14,6 +14,7 @@ class CurrencySelectWidget(forms.MultiWidget):
         super(CurrencySelectWidget, self).__init__(widgets, attrs)
 
     def decompress(self, value):
-        if value:
+        try:
             return [value.amount, value.currency]
-        return [None, None]
+        except:
+            return [None, None]
