@@ -83,6 +83,28 @@ class Money(object):
 
     """
 
+    @classmethod
+    def _from_string(cls, value):
+        s = str(value).strip()
+        try:
+            amount = Decimal(s)
+            currency = DEFAULT_CURRENCY
+        except:
+            try:
+                currency = CURRENCY[s[:3].upper()]
+                amount = Decimal(s[3:].strip())
+            except:
+                raise IncorrectMoneyInputError("The value '%s' is not properly formatted as 'XXX 123.45' " % s)
+        return amount, currency
+
+    @classmethod
+    def from_string(cls, value):
+        """
+        Parses a properly formatted string. The string should be formatted as
+        given by the repr function: 'USD 123.45'
+        """
+        return Money(*cls._from_string(value))
+
     def _currency_check(self, other):
         """ Compare the currencies matches and raise if not """
         if self.currency != other.currency:
@@ -228,28 +250,6 @@ class Money(object):
 
     def __ge__(self, other):
         return self > other or self == other
-
-    # Miscellaneous helper methods
-    def from_string(self, value):
-        """
-        Parses a properly formatted string and sets the instance to have the
-        monetary value and currency. The string should be formatted as given by
-        the repr function: 'USD 123.45'
-        """
-        self.amount, self.currency = self._from_string(value)
-
-    def _from_string(self, value):
-        s = str(value).strip()
-        try:
-            amount = Decimal(s)
-            currency = DEFAULT_CURRENCY
-        except:
-            try:
-                currency = CURRENCY[s[:3].upper()]
-                amount = Decimal(s[3:].strip())
-            except:
-                raise IncorrectMoneyInputError("The value '%s' is not properly formatted as 'XXX 123.45' " % s)
-        return (amount, currency)
 
 #
 # Definitions of ISO 4217 Currencies
