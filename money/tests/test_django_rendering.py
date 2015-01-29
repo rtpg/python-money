@@ -35,8 +35,8 @@ class TestView(TestCase):
         self.assertContains(response, 'money.amount|0.0|')
         self.assertContains(response, 'money.currency|JPY|')
 
-    def test_model_save_view(self):
-        url = reverse(model_save_view)
+    def test_model_from_db_view(self):
+        url = reverse(model_from_db_view)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 

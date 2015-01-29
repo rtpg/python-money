@@ -70,7 +70,8 @@ class MoneyTestCase(TestCase):
 
     def test_creation_unspecified_amount(self):
         """
-        Same thing as above but with the unspecified 'xxx' currency        """
+        Same thing as above but with the unspecified 'xxx' currency
+        """
 
         result = Money(currency='USD')
         self.assertEqual(result.amount, 0)

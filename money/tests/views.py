@@ -27,10 +27,10 @@ def model_view(request):
     return render_to_response('view.html', {'money': money})
 
 
-def model_save_view(request):
+def model_from_db_view(request):
     # db roundtrip
     instance = SimpleMoneyModel.objects.create(price=Money('0.0', 'JPY'))
-    # instance = SimpleMoneyModel.objects.get(pk=instance.pk)
+    instance = SimpleMoneyModel.objects.get(pk=instance.pk)
 
     print instance, instance.pk
 
