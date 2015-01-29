@@ -38,20 +38,18 @@ def model_save_view(request):
     return render_to_response('view.html', {'money': money})
 
 
-def model_form_view(request):
+def model_form_view(request, amount='0', currency='XXX'):
+    cleaned_data = {}
     if request.method == 'POST':
         form = TestModelForm(request.POST)
-        print form.is_valid()
-        print form.errors
         if form.is_valid():
-            print form.cleaned_data['price']
-            # price = form.cleaned_data['price']
+            cleaned_data = form.cleaned_data
             form.save()
+            # Most views would redirect here but we continue so we can render the data
     else:
-        form = TestModelForm(initial={'price': Money('987.00', 'JPY')})
+        form = TestModelForm(initial={'price': Money(amount, currency)})
 
-    return render_to_response('form.html', {'form': form})
-
+    return render_to_response('form.html', {'form': form, 'cleaned_data': cleaned_data})
 
 
 def regular_form(request):

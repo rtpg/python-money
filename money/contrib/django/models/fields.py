@@ -179,7 +179,7 @@ class MoneyField(InfiniteDecimalField):
         if your field does not support that type of lookup."
 
         """
-        if not lookup_type in SUPPORTED_LOOKUPS:
+        if lookup_type not in SUPPORTED_LOOKUPS:
             raise NotSupportedLookup(lookup_type)
 
         if isinstance(value, Money):
