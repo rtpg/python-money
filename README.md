@@ -230,6 +230,21 @@ Tests can be run via the `setup.py` script:
 If you wish to contribute code, please run these tests to ensure nothing breaks.
 
 
+SQLite
+------
+
+Due to [the way SQLite handles][sqlite_datatypes] `NUMERIC` values, a value
+like `100.00` will be coerced into an integer. This means the user entered
+precision is lost when saving to the database. The alternative would be to
+store the value as a `TEXT` affinity but then ORM comparison operations will
+break.
+
+If your application always specified the precision, this isn't a problem. If
+you need to maintain the user's precision, then SQLite is not recommended.
+
+[sqlite_datatypes]: http://www.sqlite.org/datatype3.html
+
+
 TODO
 ====
 
