@@ -93,13 +93,18 @@ MONEY_ARITHMETIC_UNSUPPORTED = [
 
     # Multiplication of 2 Money objects
     (lambda: Money('100') * Money('100')),
+
+    # Subtracting money from a digit
+    # (lambda: 100 - Money('100')),
+    # (lambda: 100 - - Money('100')),
+    (lambda: Decimal('100') - Money('100')),
+    (lambda: Decimal('-100') - Money('100')),
 ]
 
 
 @pytest.mark.parametrize("value", MONEY_ARITHMETIC_UNSUPPORTED)
 def test_invalid_arithmetic(value):
     with pytest.raises(TypeError):
-        print value()
         value()
 
 

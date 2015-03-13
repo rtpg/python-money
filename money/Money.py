@@ -173,11 +173,10 @@ class Money(object):
             return Money(amount=self.amount - Decimal(str(other)), currency=self.currency)
 
     def __rsub__(self, other):
-        if isinstance(other, Money):
-            self._currency_check(other)
-            return Money(amount=other.amount - self.amount, currency=self.currency)
-        else:
-            return Money(amount=Decimal(str(other) - self.amount), currency=self.currency)
+        # In the case where both values are Money, the left hand one will be
+        # called. In the case where we are subtracting Money from another
+        # value, we want to disallow it
+        raise TypeError("Can not subtact Money from %r" % other)
 
     def __mul__(self, other):
         if isinstance(other, Money):
