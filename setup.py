@@ -11,7 +11,7 @@ except ImportError:
 
 from setuptools.command.test import test as TestCommand
 
-from version import get_git_version, get_git_hash
+from money.version import get_git_version, get_git_hash
 
 
 loc = os.path.abspath(os.path.dirname(__file__))
@@ -50,6 +50,8 @@ extras_require = {
     'django':  ['Django < 1.7', ],
 }
 
+# For requirements that are not on pypi you can add something like:
+# 'http://github.com/user/repo/tarball/master#egg=package-1.0'
 dependency_links = []
 
 setup(
