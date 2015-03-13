@@ -228,10 +228,7 @@ class Money(object):
         return False
 
     def __ne__(self, other):
-        result = self.__eq__(other)
-        if result is NotImplemented:
-            return result
-        return not result
+        return not self.__eq__(other)
 
     def __lt__(self, other):
         if isinstance(other, Money):
