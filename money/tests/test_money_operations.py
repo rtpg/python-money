@@ -43,6 +43,11 @@ def test_repr(value, expected):
 
 
 MONEY_ARITHMETIC = [
+    # Casting
+    (lambda: Money('100') + 0.5, Money('100.5')),
+    (lambda: float(Money('100')), float(100)),
+    (lambda: int(Money('100')), 100),
+
     # Addition
     (lambda: Money('100') + Money('100'), Money('200')),
     (lambda: Money('100') + Money('-100'), Money('0')),

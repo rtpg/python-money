@@ -155,6 +155,9 @@ class Money(object):
     def __float__(self):
         return float(self.amount)
 
+    def __int__(self):
+        return int(self.amount)
+
     def __pos__(self):
         return Money(amount=self.amount, currency=self.currency)
 
