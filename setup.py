@@ -41,7 +41,9 @@ tests_require = [
     'django<1.7',
 ]
 
-requirements = []
+requirements = [
+    'six',
+]
 
 extras_require = {
     'django':  ['Django < 1.7', ],

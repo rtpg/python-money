@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import division
+import six
 
 import exceptions
 
@@ -29,6 +30,8 @@ class Currency(object):
     def __eq__(self, other):
         if isinstance(other, Currency):
             return self.code and other.code and self.code == other.code
+        if isinstance(other, six.string_types):
+            return self.code == other
         return False
 
     def __ne__(self, other):

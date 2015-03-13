@@ -11,6 +11,20 @@ from money import (
 )
 
 
+def test_string_parse():
+    value = Money.from_string("USD 100.0")
+    assert value.amount == Decimal("100.0")
+    assert value.currency == 'USD'
+    assert value.currency == CURRENCY['USD']
+
+
+def test_string_parse_default_currency():
+    value = Money.from_string("100.0")
+    assert value.amount == Decimal("100.0")
+    assert value.currency == 'XXX'
+    assert value.currency == CURRENCY['XXX']
+
+
 class MoneyTestCase(TestCase):
     """
     Tests of the Money class
