@@ -147,6 +147,25 @@ always emulate the first two by using the underlying amounts:
 This makes the intention of the code more clear.
 
 
+Boolean Evaluation
+------------------
+
+When evaluated in a boolean context, the `Money` type behaves similar to the
+python `Decimal` class:
+
+    bool(Decimal('0'))    # False
+    bool(Decimal('0.1'))  # True
+
+    bool(Money('0', 'USD'))    # False
+    bool(Money('0.01', 'USD')) # True
+    bool(Money('1'))           # True
+
+To test for the existance of the objects, compare the value to `None`:
+
+    if amount is None:
+        amount = Money(0)
+
+
 Django
 ======
 
@@ -253,6 +272,40 @@ TODO
 
 CHANGELOG
 ===
+
+* Version 1.0.0
+
+    Note: This fork of the project is now going to be version-managed separate
+    from other forks. This is the first release that we consider to be fully
+    'production ready' for our purposes. Future changes will follow semantic
+    versioning.
+
+    - Fixed several bugs in mathematical operations
+    - Better use of standard python packaging
+    - Added a full test suite
+    - Added coverage report generation
+    - Implement both python 2 and 3 division operators
+    - Division now returns Money objects
+    - Disable floor division
+    - Work toward making the `Money` immutable so it can safely be used as a
+      field default
+
+    The following backwards incompatible changes were made:
+
+    - Added python 2 and 3 boolean operations. Boolean evaluation of the money
+      class has changed to match the behavior of the Decimal class.
+    - Unsupported django ORM lookups now raise an exception that is a subclass
+      of `TypeError` as recommended by the django docs
+    - The `InvalidOperationException` now extends `TypeError` instead of the
+      `ArithmeticError` exception
+    - Removed the `set_default_currency` global function
+    - Removed the implicit currency conversion methods: `convert_to_default`,
+      `convert_to`, and `allocate`
+    - Removed the custom override of the `%` operator
+    - Removed the currency exchange rate form the `Currency` object and the
+      related `set_exchange_rate()` method.
+    - The `Money.from_string` method is now a classmethod
+
 
 * Version 0.2.0
     - Fixed an issue with the South introspection rule for MoneyField similar
