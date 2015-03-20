@@ -3,7 +3,7 @@ import pytest
 from django.core.urlresolvers import reverse
 from django.test import TestCase, Client
 
-from money import test_settings
+from money.tests import settings as test_settings
 
 from money.tests.models import (
     SimpleMoneyModel,
@@ -62,6 +62,7 @@ class TestEditView(TestCase):
 
     def setUp(self):
         self.client = Client()
+
 
     def test_form_GET(self):
         url = reverse(model_form_view, kwargs={'amount': '987.00', 'currency': 'JPY'})
