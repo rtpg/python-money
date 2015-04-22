@@ -78,7 +78,8 @@ class MoneyFieldTestCase(TestCase):
 
         ent = SimpleMoneyModel.objects.filter(price__exact=Money(100, "USD")).get()
         self.assertEquals(ent.price, Money(100, "USD"))
-        ent.price.amount = 300
+
+        ent.price = Money(300, "USD")
         ent.save()
 
         ent = SimpleMoneyModel.objects.filter(price__exact=Money(300, "USD")).get()
@@ -183,9 +184,9 @@ class MoneyFieldTestCase(TestCase):
 
     def test_price_attribute(self):
         e = SimpleMoneyModel()
-        e.price = Money(0, "BGN")
-        e.price.amount = 3
+        e.price = Money(3, "BGN")
         self.assertEqual(e.price, Money(3, "BGN"))
+
         e.price = Money.from_string("BGN 5.0")
         self.assertEqual(e.price, Money(5, "BGN"))
 
