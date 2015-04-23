@@ -7,7 +7,9 @@ from money import Money
 
 __all__ = ('MoneyField', 'currency_field_name', 'NotSupportedLookup')
 
-currency_field_name = lambda name: "%s_currency" % name
+
+def currency_field_name(name):
+    return "%s_currency" % name
 
 
 SUPPORTED_LOOKUPS = ('exact', 'lt', 'gt', 'lte', 'gte')
