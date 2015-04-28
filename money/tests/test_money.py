@@ -11,6 +11,20 @@ from money import (
 )
 
 
+def test_string_parse():
+    value = Money.from_string("USD 100.0")
+    assert value.amount == Decimal("100.0")
+    assert value.currency == 'USD'
+    assert value.currency == CURRENCY['USD']
+
+
+def test_string_parse_default_currency():
+    value = Money.from_string("100.0")
+    assert value.amount == Decimal("100.0")
+    assert value.currency == 'XXX'
+    assert value.currency == CURRENCY['XXX']
+
+
 class MoneyTestCase(TestCase):
     """
     Tests of the Money class
@@ -135,6 +149,16 @@ class MoneyTestCase(TestCase):
         self.assertEqual(result.amount, Decimal("-7"))
         self.assertEqual(result.currency, CURRENCY['USD'])
 
+    def test_amount_attribute(self):
+        value = Money(101, 'USD')
+        self.assertEqual(value.amount, 101)
+
+    def test_currency_attribute(self):
+        value = Money(101, 'USD')
+        self.assertEqual(value.currency, 'USD')
+        value = Money(101, 'JPY')
+        self.assertEqual(value.currency, 'JPY')
+
 
 class InvalidMoneyOperationTestCase(TestCase):
     """
@@ -166,3 +190,11 @@ class InvalidMoneyOperationTestCase(TestCase):
     def test_differing_currency_multiplication(self):
         # Differing currencies shouldnt matter
         self.assertRaises(InvalidOperationException, lambda: Money(10, 'JPY') * Money(3, 'USD'))
+
+    def test_mutation_of_amount(self):
+        with self.assertRaises(AttributeError):
+            Money(10, 'JPY').amount = 3
+
+    def test_mutation_of_currency(self):
+        with self.assertRaises(AttributeError):
+            Money(10, 'JPY').currency = 'USD'

@@ -43,6 +43,11 @@ def test_repr(value, expected):
 
 
 MONEY_ARITHMETIC = [
+    # Casting
+    (lambda: Money('100') + 0.5, Money('100.5')),
+    (lambda: float(Money('100')), float(100)),
+    (lambda: int(Money('100')), 100),
+
     # Addition
     (lambda: Money('100') + Money('100'), Money('200')),
     (lambda: Money('100') + Money('-100'), Money('0')),
@@ -66,6 +71,11 @@ MONEY_ARITHMETIC = [
     # Division
     (lambda: Money('100') / 4, Money('25')),
     (lambda: Money('100') / Decimal('4'), Money('25')),
+
+    # Negation
+    (lambda: - Money('100'), Money('-100')),
+    (lambda: - Money('100.12', 'USD'), Money('-100.12', 'USD')),
+    (lambda: + Money('100'), Money('100')),
 ]
 
 
@@ -93,13 +103,18 @@ MONEY_ARITHMETIC_UNSUPPORTED = [
 
     # Multiplication of 2 Money objects
     (lambda: Money('100') * Money('100')),
+
+    # Subtracting money from a digit
+    # (lambda: 100 - Money('100')),
+    # (lambda: 100 - - Money('100')),
+    (lambda: Decimal('100') - Money('100')),
+    (lambda: Decimal('-100') - Money('100')),
 ]
 
 
 @pytest.mark.parametrize("value", MONEY_ARITHMETIC_UNSUPPORTED)
 def test_invalid_arithmetic(value):
     with pytest.raises(TypeError):
-        print value()
         value()
 
 
@@ -163,6 +178,19 @@ MONEY_EQUALITY = [
     (100 != Money('100.0', 'EUR'), True),
 
     # LT/GT
+    (0 < Money('0'), False),
+    (100 < Money('100'), False),
+    (-100 < Money('-100'), False),
+    (100 < Money('100', 'EUR'), False),
+    (100.0 < Money('100', 'EUR'), False),
+
+    (0 > Money('1'), False),
+    (1 > Money('0'), True),
+    (-101 > Money('-100'), False),
+    (-100 > Money('-101'), True),
+    (100 > Money('100.01', 'EUR'), False),
+    (100.01 > Money('100', 'EUR'), True),
+
     (Money('0') < Money('0'), False),
     (Money('100') < Money('100'), False),
     (Money('-100') < Money('-100'), False),

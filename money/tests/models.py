@@ -8,7 +8,6 @@ from money import Money
 class SimpleMoneyModel(models.Model):
     name = models.CharField(max_length=100)
 
-    # Default should be '0.000 XXX'
     price = fields.MoneyField(max_digits=12, decimal_places=3)
 
     def __unicode__(self):
@@ -42,14 +41,26 @@ class MoneyModelDefaults(models.Model):
         app_label = 'tests'
 
 
+class NullableMoneyModel(models.Model):
+    name = models.CharField(max_length=100)
+
+    price = fields.MoneyField(max_digits=12, decimal_places=3, null=True)
+
+    def __unicode__(self):
+        return self.name + u" " + unicode(self.price)
+
+    class Meta:
+        app_label = 'tests'
+
+
 # A parametrized way of testing the model defaults. The following are all
 # accetpable ways the field can be defined on a model
 class ParametrizedModel(models.Model):
     """ The simplest possible declaration """
-    value = fields.MoneyField(max_digits=12, decimal_places=3)
+    value = fields.MoneyField(max_digits=12, decimal_places=3, default=123)
 
     def expected_value(self):
-        return Money('0', 'XXX')
+        return Money('123', 'XXX')
 
 
 class ParametrizedDefaultAsZeroMoneyModel(models.Model):

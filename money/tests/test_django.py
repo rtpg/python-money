@@ -8,6 +8,7 @@ from money.tests.models import (
     SimpleMoneyModel,
     MoneyModelDefaultMoneyUSD,
     MoneyModelDefaults,
+    NullableMoneyModel,
 )
 
 
@@ -78,7 +79,8 @@ class MoneyFieldTestCase(TestCase):
 
         ent = SimpleMoneyModel.objects.filter(price__exact=Money(100, "USD")).get()
         self.assertEquals(ent.price, Money(100, "USD"))
-        ent.price.amount = 300
+
+        ent.price = Money(300, "USD")
         ent.save()
 
         ent = SimpleMoneyModel.objects.filter(price__exact=Money(300, "USD")).get()
@@ -183,9 +185,9 @@ class MoneyFieldTestCase(TestCase):
 
     def test_price_attribute(self):
         e = SimpleMoneyModel()
-        e.price = Money(0, "BGN")
-        e.price.amount = 3
+        e.price = Money(3, "BGN")
         self.assertEqual(e.price, Money(3, "BGN"))
+
         e.price = Money.from_string("BGN 5.0")
         self.assertEqual(e.price, Money(5, "BGN"))
 
@@ -232,6 +234,60 @@ class MoneyFieldTestCase(TestCase):
     def test_unsupported_lookup(self):
         with pytest.raises(NotSupportedLookup):
             SimpleMoneyModel.objects.filter(price__startswith='ABC')
+
+
+@pytest.mark.django_db
+class TestNullability(TestCase):
+
+    def test_nullable_model_instance(self):
+        instance = NullableMoneyModel()
+        self.assertEquals(instance.price, None)
+
+    def test_nullable_model_save(self):
+        instance = NullableMoneyModel()
+        instance.save()
+        self.assertEquals(instance.price, None)
+
+    def test_nullable_model_create_and_lookup(self):
+        name = "test_nullable_model_create_and_lookup"
+        NullableMoneyModel.objects.create(name=name)
+        instance = NullableMoneyModel.objects.get(name=name)
+        self.assertEquals(instance.price, None)
+
+    def test_nullable_model_lookup_by_null_amount(self):
+        name = "test_nullable_model_lookup_by_null_amount"
+        NullableMoneyModel.objects.create(name=name)
+
+        # Assert NULL currency has "blank" currency
+        instance = NullableMoneyModel.objects.filter(price_currency='')[0]
+        self.assertEquals(instance.name, name)
+
+    def test_nullable_model_lookup_by_null_currency(self):
+        name = "test_nullable_model_lookup_by_null_currency"
+        NullableMoneyModel.objects.create(name=name)
+
+        # Assert NULL currency has "blank" currency
+        instance = NullableMoneyModel.objects.filter(price__isnull=True)[0]
+        self.assertEquals(instance.name, name)
+
+    def test_nullable_null_currency_vs_undefined_currency(self):
+        name = "test_nullable_null_currency_vs_undefined_currency"
+        NullableMoneyModel.objects.create(name=name+"_null", price=None)
+        NullableMoneyModel.objects.create(name=name+"_undefined", price=Money(0))
+        self.assertEquals(NullableMoneyModel.objects.all().count(), 2)
+
+        # Assert NULL currency has "blank" currency
+        self.assertEquals(NullableMoneyModel.objects.filter(price__isnull=True).count(), 1)
+        null_instance = NullableMoneyModel.objects.filter(price__isnull=True)[0]
+        self.assertEquals(null_instance.name, name + "_null")
+        null_instance = NullableMoneyModel.objects.filter(price_currency='')[0]
+        self.assertEquals(null_instance.name, name + "_null")
+
+        self.assertEquals(NullableMoneyModel.objects.filter(price__isnull=False).count(), 1)
+        undefined_instance = NullableMoneyModel.objects.filter(price__isnull=False)[0]
+        self.assertEquals(undefined_instance.name, name+"_undefined")
+        undefined_instance = NullableMoneyModel.objects.filter(price_currency='XXX')[0]
+        self.assertEquals(undefined_instance.name, name + "_undefined")
 
 
 @pytest.mark.django_db

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import division
+import six
 
 import exceptions
 
@@ -29,6 +30,8 @@ class Currency(object):
     def __eq__(self, other):
         if isinstance(other, Currency):
             return self.code and other.code and self.code == other.code
+        if isinstance(other, six.string_types):
+            return self.code == other
         return False
 
     def __ne__(self, other):
@@ -107,15 +110,15 @@ class Money(object):
 
     def _currency_check(self, other):
         """ Compare the currencies matches and raise if not """
-        if self.currency != other.currency:
-            raise CurrencyMismatchException(u"Currency mismatch: %s != %s" % (self.currency, other.currency,))
+        if self._currency != other.currency:
+            raise CurrencyMismatchException(u"Currency mismatch: %s != %s" % (self._currency, other.currency,))
 
     def __init__(self, amount=None, currency=None):
         if isinstance(amount, Decimal):
-            self.amount = amount
+            self._amount = amount
         else:
             try:
-                self.amount = Decimal(amount or 0)
+                self._amount = Decimal(amount or 0)
             except:
                 # Decimal couldn't initialize it..
                 try:
@@ -123,9 +126,9 @@ class Money(object):
                     if currency:
                         raise IncorrectMoneyInputError(
                             "Initialized with conflicting currencies %s %s"
-                            % currency.code, self.amount)
+                            % currency.code, self._amount)
 
-                    self.amount, currency = self._from_string(amount)
+                    self._amount, currency = self._from_string(amount)
                 except:
                     raise IncorrectMoneyInputError("Cannot initialize with amount %s" % amount)
 
@@ -136,53 +139,63 @@ class Money(object):
         if not isinstance(currency, Currency):
             currency = CURRENCY[str(currency).upper()]
 
-        self.currency = currency
-        assert isinstance(self.amount, Decimal)
-        assert isinstance(self.currency, Currency)
+        self._currency = currency
+        assert isinstance(self._amount, Decimal)
+        assert isinstance(self._currency, Currency)
+
+    @property
+    def amount(self):
+        return self._amount
+
+    @property
+    def currency(self):
+        return self._currency
 
     def __str__(self):
-        return "{} {}".format(self.currency, self.amount)
+        return "{} {}".format(self._currency, self._amount)
 
     def __unicode__(self):
-        return u"{} {}".format(self.currency, self.amount)
+        return u"{} {}".format(self._currency, self._amount)
 
     def __repr__(self):
         return str(self)
 
     def __float__(self):
-        return float(self.amount)
+        return float(self._amount)
+
+    def __int__(self):
+        return int(self._amount)
 
     def __pos__(self):
-        return Money(amount=self.amount, currency=self.currency)
+        return Money(amount=self._amount, currency=self._currency)
 
     def __neg__(self):
-        return Money(amount=-self.amount, currency=self.currency)
+        return Money(amount=-self._amount, currency=self._currency)
 
     def __add__(self, other):
         if isinstance(other, Money):
             self._currency_check(other)
-            return Money(amount=self.amount + other.amount, currency=self.currency)
+            return Money(amount=self._amount + other.amount, currency=self._currency)
         else:
-            return Money(amount=self.amount + Decimal(str(other)), currency=self.currency)
+            return Money(amount=self._amount + Decimal(str(other)), currency=self._currency)
 
     def __sub__(self, other):
         if isinstance(other, Money):
             self._currency_check(other)
-            return Money(amount=self.amount - other.amount, currency=self.currency)
+            return Money(amount=self._amount - other.amount, currency=self._currency)
         else:
-            return Money(amount=self.amount - Decimal(str(other)), currency=self.currency)
+            return Money(amount=self._amount - Decimal(str(other)), currency=self._currency)
 
     def __rsub__(self, other):
-        if isinstance(other, Money):
-            self._currency_check(other)
-            return Money(amount=other.amount - self.amount, currency=self.currency)
-        else:
-            return Money(amount=Decimal(str(other) - self.amount), currency=self.currency)
+        # In the case where both values are Money, the left hand one will be
+        # called. In the case where we are subtracting Money from another
+        # value, we want to disallow it
+        raise TypeError("Can not subtact Money from %r" % other)
 
     def __mul__(self, other):
         if isinstance(other, Money):
             raise InvalidOperationException(u'Cannot multiply monetary quantities')
-        return Money(amount=self.amount*Decimal(str(other)), currency=self.currency)
+        return Money(amount=self._amount*Decimal(str(other)), currency=self._currency)
 
     def __truediv__(self, other):
         """
@@ -191,7 +204,7 @@ class Money(object):
         """
         if isinstance(other, Money):
             raise InvalidOperationException(u'Cannot divide two monetary quantities')
-        return Money(amount=self.amount / other, currency=self.currency)
+        return Money(amount=self._amount / other, currency=self._currency)
 
     __div__ = __truediv__
 
@@ -209,7 +222,7 @@ class Money(object):
 
     # Boolean
     def __bool__(self):
-        if self.amount != 0:
+        if self._amount != 0:
             return True
         else:
             return False
@@ -219,31 +232,28 @@ class Money(object):
     # Comparison operators
     def __eq__(self, other):
         if isinstance(other, Money):
-            return (self.amount == other.amount) and (self.currency == other.currency)
+            return (self._amount == other.amount) and (self._currency == other.currency)
         # Allow comparison to 0
-        if (other == 0) and (self.amount == 0):
+        if (other == 0) and (self._amount == 0):
             return True
         return False
 
     def __ne__(self, other):
-        result = self.__eq__(other)
-        if result is NotImplemented:
-            return result
-        return not result
+        return not self.__eq__(other)
 
     def __lt__(self, other):
         if isinstance(other, Money):
             self._currency_check(other)
-            return (self.amount < other.amount)
+            return (self._amount < other.amount)
         else:
-            return (self.amount < Decimal(str(other)))
+            return (self._amount < Decimal(str(other)))
 
     def __gt__(self, other):
         if isinstance(other, Money):
             self._currency_check(other)
-            return (self.amount > other.amount)
+            return (self._amount > other.amount)
         else:
-            return (self.amount > Decimal(str(other)))
+            return (self._amount > Decimal(str(other)))
 
     def __le__(self, other):
         return self < other or self == other
