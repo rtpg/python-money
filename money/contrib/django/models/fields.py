@@ -1,5 +1,6 @@
+from decimal import Decimal
+
 from django.db import models
-from django.utils.encoding import smart_unicode
 from django.utils.translation import ugettext_lazy as _
 
 from money.contrib.django import forms
@@ -12,7 +13,7 @@ def currency_field_name(name):
     return "%s_currency" % name
 
 
-SUPPORTED_LOOKUPS = ('exact', 'lt', 'gt', 'lte', 'gte')
+SUPPORTED_LOOKUPS = ('exact', 'lt', 'gt', 'lte', 'gte', 'isnull')
 
 
 class NotSupportedLookup(TypeError):
@@ -36,28 +37,50 @@ class MoneyFieldProxy(object):
 
     See: http://blog.elsdoerfer.name/2008/01/08/fuzzydates-or-one-django-model-field-multiple-database-columns/
     """
+
     def __init__(self, field):
         self.field = field
-        self.currency_field_name = currency_field_name(self.field.name)
+        self.amount_field_name = field.name
+        self.currency_field_name = currency_field_name(field.name)
 
-    def _money_from_obj(self, obj):
-        return Money(obj.__dict__[self.field.name], obj.__dict__[self.currency_field_name])
+    def _get_values(self, obj):
+        return (obj.__dict__.get(self.field.amount_field_name, None),
+                obj.__dict__.get(self.field.currency_field_name, None))
 
-    def __get__(self, obj, type=None):
-        if obj is None:
-            raise AttributeError('Can only be accessed via an instance.')
-        if not isinstance(obj.__dict__[self.field.name], Money):
-            obj.__dict__[self.field.name] = self._money_from_obj(obj)
-        return obj.__dict__[self.field.name]
+    def _set_values(self, obj, amount, currency):
+        obj.__dict__[self.field.amount_field_name] = amount
+        obj.__dict__[self.field.currency_field_name] = currency
+
+    def __get__(self, obj, *args):
+        amount, currency = self._get_values(obj)
+        if amount is None:
+            return None
+        return Money(amount, currency)
 
     def __set__(self, obj, value):
-        if isinstance(value, Money):
-            obj.__dict__[self.field.name] = value.amount
-            setattr(obj, self.currency_field_name, smart_unicode(value.currency))
+        if value is None: # Money(0) is False
+            self._set_values(obj, None, '')
+        elif isinstance(value, Money):
+            self._set_values(obj, value.amount, value.currency)
+        elif isinstance(value, Decimal):
+            _, currency = self._get_values(obj) # use what is currently set
+            self._set_values(obj, value, currency)
         else:
-            if value:
-                value = str(value)
-            obj.__dict__[self.field.name] = self.field.to_python(value)
+            # It could be an int, or some other python native type
+            try:
+                amount = Decimal(str(value))
+                _, currency = self._get_values(obj) # use what is currently set
+                self._set_values(obj, amount, currency)
+            except TypeError:
+                # Lastly, assume string type 'XXX 123' or something Money can
+                # handle.
+                try:
+                    _, currency = self._get_values(obj) # use what is currently set
+                    m = Money.from_string(str(value))
+                    self._set_values(obj, m.amount, m.currency)
+                except TypeError:
+                    msg = 'Cannot assign "%s"' % type(value)
+                    raise TypeError(msg)
 
 
 class InfiniteDecimalField(models.DecimalField):
@@ -110,14 +133,17 @@ class MoneyField(InfiniteDecimalField):
 
     def __init__(self, *args, **kwargs):
         # We add the currency field except when using frozen south orm. See introspection rules below.
+        default_currency = kwargs.pop("default_currency", '')
         default = kwargs.get("default", None)
-        default_currency = kwargs.pop("default_currency", "")
-
         self.add_currency_field = not kwargs.pop('no_currency_field', False)
+
+        self.blankable = kwargs.get('blank', False)
+
         if isinstance(default, Money):
             self.default_currency = default.currency # use the default's currency
+            kwargs['default'] = default.amount
         else:
-            self.default_currency = default_currency # use the kwarg passed in
+            self.default_currency = default_currency or '' # use the kwarg passed in
 
         super(MoneyField, self).__init__(*args, **kwargs)
 
@@ -139,12 +165,22 @@ class MoneyField(InfiniteDecimalField):
         return value
 
     def contribute_to_class(self, cls, name):
+        self.name = name
+        self.amount_field_name = name
+        self.currency_field_name = currency_field_name(name)
+
         if self.add_currency_field and not cls._meta.abstract:
-            c_field = CurrencyField(max_length=3, default=self.default_currency, editable=False)
+            c_field = CurrencyField(
+                max_length=3,
+                default=self.default_currency,
+                editable=False,
+                null=False, # empty char fields should be ''
+                blank=self.blankable,
+            )
             # Use this field's creation counter for the currency field. This
             # field will get a +1 when we call super
             c_field.creation_counter = self.creation_counter
-            cls.add_to_class(currency_field_name(name), c_field)
+            cls.add_to_class(self.currency_field_name, c_field)
 
         # Set ourselves up normally
         super(MoneyField, self).contribute_to_class(cls, name)
