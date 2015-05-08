@@ -235,6 +235,30 @@ class MoneyFieldTestCase(TestCase):
         with pytest.raises(NotSupportedLookup):
             SimpleMoneyModel.objects.filter(price__startswith='ABC')
 
+    def test_currency_accessor(self):
+        # In the old code, accessing `myinstance.myfield_currency` would work.
+        # Here we test for that and emulate the old behavior. This should
+        # probably not be part of the official API and when removed, this test
+        # can be removed as well.
+
+        created = SimpleMoneyModel.objects.create(name="zero dollars", price=Money(0))
+        self.assertEquals(created.price_currency, "XXX")
+        self.assertEquals(created.price.currency, "XXX")
+
+        created = SimpleMoneyModel.objects.create(name="zero dollars", price=Money(0, "USD"))
+        self.assertEquals(created.price_currency, "USD")
+        self.assertEquals(created.price.currency, "USD")
+
+        # This actually wouldn't work in the old code without a round trip to the db
+        created.price_currency = 'EUR'
+        self.assertEquals(created.price_currency, "EUR")
+        self.assertEquals(created.price.currency, "EUR")
+
+        created.save()
+        created = SimpleMoneyModel.objects.get(pk=created.pk)
+        self.assertEquals(created.price_currency, "EUR")
+        self.assertEquals(created.price.currency, "EUR")
+
 
 @pytest.mark.django_db
 class TestNullability(TestCase):
