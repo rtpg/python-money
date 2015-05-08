@@ -1,7 +1,7 @@
 import pytest
 
 from django.test import TestCase
-
+from django.db import IntegrityError
 from money import Money, CURRENCY
 from money.contrib.django.models.fields import NotSupportedLookup
 from money.tests.models import (
@@ -21,6 +21,11 @@ class MoneyFieldTestCase(TestCase):
         self.assertTrue(len(currencies) == 1)
         if currency:
             self.assertEqual(currencies.pop().code, currency)
+
+    def test_non_null(self):
+        instance = SimpleMoneyModel()
+        with pytest.raises(IntegrityError):
+            instance.save()
 
     def test_creating(self):
         ind = 0
