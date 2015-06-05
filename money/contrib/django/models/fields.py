@@ -119,6 +119,11 @@ class MoneyField(InfiniteDecimalField):
 
         super(MoneyField, self).__init__(*args, **kwargs)
 
+    def deconstruct(self):
+        name, path, args, kwargs = super(MoneyField, self).deconstruct()
+        kwargs['no_currency_field'] = True
+        return name, path, args, kwargs
+
     # Implementing to_python should not be needed because we are directly
     # assigning the attributes to the model with the proxy class. Some parts
     # of the model forms code still tries to call to_python on the field
