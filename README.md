@@ -5,6 +5,21 @@ python-money
 Primitives for working with money and currencies in Python
 
 
+Compatibility
+=============
+
+This fork of python-money (rooted at poswald/python-money) is significantly
+different than other versions in the family tree. If you plan on using it,
+please be aware that it most likely won't be a drop-in replacement.
+
+We have made several changes to be more conservative about operations,
+remove implicit conversion of currency, remove global state, added a
+postgres specific field, and a `py.test` based test suite among other changes.
+
+You are free to use this version but please look at other forks as well as they
+may better suit your use case.
+
+
 Installation
 ============
 
@@ -13,6 +28,7 @@ You can install this project directly from the git repository using pip:
     $ pip install -e git+http://github.com/poswald/python-money.git@0.0.1#egg=python-money
 
 You do not have to specify the version number but it might be a good idea.
+
 
 Usage
 =====
@@ -97,6 +113,59 @@ add two monetary values that are in differing currency, they will first be
 converted into the default currency, and then added together.
 
 
+A Note About Equality and Math Operations
+-----------------------------------------
+
+The way equlity is currently implemented, `USD 0` is not equal to `EUR 0` however,
+`USD 0` is considered equal to `0`. This means you can only compare similar
+currencies to each other, but it is safe to compare a currancy to the value `0`.
+
+Comparing two differing currencies is undefined and will raise
+a `money.CurrencyMismatchException`. Prior versions of this project would do an
+implicit conversion to a 'base' currency using a defined conversion rate and
+perform the operation. We believe this is unexpected behavior and it is better
+to let the user do that conversion themselves for the cases where they know they
+are comparing differing currencies.
+
+Similarly, we take a conservative approach to certain math operations. For
+example, `Money(10, 'USD') - Money(3, 'JPY')` is not allowed due to differing
+currencies.
+
+Both `Money(3, 'USD') * Money(3, 'USD')` and `Money(9, 'USD') / Money(3, 'USD')`
+are undefined. There are 3 conceiveable ways to handle division:
+
+    Money(9, 'USD') / Money(3, 'USD') # Money(3, 'XXX') # where 'XXX' denotes undefined currency
+    Money(9, 'USD') / Money(3, 'USD') # Decimal('3')
+    Money(9, 'USD') / Money(3, 'USD') # raise money.InvalidOperationException
+
+We have chosen the last option as it is the most conservative option. You can
+always emulate the first two by using the underlying amounts:
+
+    Money(9, 'USD').amount / Money(3, 'USD').amount # Decimal('3')
+    Money(Money(9, 'USD').amount / Money(3, 'USD').amount) # Money('3', 'XXX')
+
+This makes the intention of the code more clear.
+
+
+Boolean Evaluation
+------------------
+
+When evaluated in a boolean context, the `Money` type behaves similar to the
+python `Decimal` class:
+
+    bool(Decimal('0'))    # False
+    bool(Decimal('0.1'))  # True
+
+    bool(Money('0', 'USD'))    # False
+    bool(Money('0.01', 'USD')) # True
+    bool(Money('1'))           # True
+
+To test for the existance of the objects, compare the value to `None`:
+
+    if amount is None:
+        amount = Money(0)
+
+
 Django
 ======
 
@@ -129,35 +198,70 @@ The value you get from your model will be a `Money` class:
     USD  199.99
 
 
+### User Defined Precision of Decimals in Postgres
+
+It can be difficult to represent decimals exactly as the user entered them with
+django. If you use postgres, you can preserve the user's entered precision by
+using the Postgresql `numeric` type. Simply use the `InfiniteDecimalField`
+class and the value will be stored as entered by the user without having to
+define the precision in the model class.
+
+    InfiniteDecimalField
+
+This allows you to store and later retreive a values like `3`, `3.0`, and
+`3.000` without losing the precision. The `MoneyField` class already extends this
+by default.
+
+
+### Fixtures
+
+When loading from or searializing to fixtures, the field class expects the values
+to be specified separately:
+
+    ...
+    {
+        "pk": 1,
+        "model": "myapp.mymodel",
+        "fields": {
+            "price": "123.45",
+            "price_currency": "USD",
+        }
+    },
+    ...
+
+You may wish to examine the tests for an example
+
+
 ### Form Field
 
-The form field used by the `models.MoneyField` is also called `MoneyField` in
+The form field used by the `models.MoneyField` is also called `MoneyField`
 
 
-### Running Django Tests
+### Running Tests
 
-There are some test cases included for the Django types. If you want to run
-them, add the test application to your INSTALLED_APPS:
+The test suite requires `py.test`, `django` and several other libaries to be
+installed. They will be downloaded and installed automatically when run.
 
-    INSTALLED_APPS = (
-    ...
-    'money.tests',
-    ...
-    )
+Tests can be run via the `setup.py` script:
 
-Run them with the manage command from your application:
+    $ python setup.py test
 
-    $ ./manage.py test money
-    Creating test database 'default'...
+If you wish to contribute code, please run these tests to ensure nothing breaks.
 
-    ...
 
-    Ran 8 tests in 0.445s
+SQLite
+------
 
-    OK
-    Destroying test database 'default'...
-    $
+Due to [the way SQLite handles][sqlite_datatypes] `NUMERIC` values, a value
+like `100.00` will be coerced into an integer. This means the user entered
+precision is lost when saving to the database. The alternative would be to
+store the value as a `TEXT` affinity but then ORM comparison operations will
+break.
 
+If your application always specified the precision, this isn't a problem. If
+you need to maintain the user's precision, then SQLite is not recommended.
+
+[sqlite_datatypes]: http://www.sqlite.org/datatype3.html
 
 
 TODO
@@ -165,17 +269,48 @@ TODO
 
 * Add more currency symbols to Currency class
 * Add number of decimal places to all Currencies. Who wants to help? :-)
-* Change the addition operation so that it raises an Exception rather
-than implicitly convert the value
-* Add a convert method to explicitly convert using the exchange rate.
-* Division of money should probably raise a custom error instead of assert on currency mismatch
-* Division of `Money` should return `Money` instead of `Decimal` type
 
 CHANGELOG
 ===
 
+* Version 1.0.0
+
+    Note: This fork of the project is now going to be version-managed separate
+    from other forks. This is the first release that we consider to be fully
+    'production ready' for our purposes. Future changes will follow semantic
+    versioning.
+
+    - Fixed several bugs in mathematical operations
+    - Better use of standard python packaging
+    - Added a full test suite
+    - Added coverage report generation
+    - Implement both python 2 and 3 division operators
+    - Division now returns Money objects
+    - Disable floor division
+    - Work toward making the `Money` immutable so it can safely be used as a
+      field default
+
+    The following backwards incompatible changes were made:
+
+    - Added python 2 and 3 boolean operations. Boolean evaluation of the money
+      class has changed to match the behavior of the Decimal class.
+    - Unsupported django ORM lookups now raise an exception that is a subclass
+      of `TypeError` as recommended by the django docs
+    - The `InvalidOperationException` now extends `TypeError` instead of the
+      `ArithmeticError` exception
+    - Removed the `set_default_currency` global function
+    - Removed the implicit currency conversion methods: `convert_to_default`,
+      `convert_to`, and `allocate`
+    - Removed the custom override of the `%` operator
+    - Removed the currency exchange rate form the `Currency` object and the
+      related `set_exchange_rate()` method.
+    - The `Money.from_string` method is now a classmethod
+
+
 * Version 0.2.0
-    - Fixed an issue with the South introspection rule for MoneyField similar to [ South #327](http://south.aeracode.org/ticket/327) You will probably need to generate a new schema migration if you are upgrading.
+    - Fixed an issue with the South introspection rule for MoneyField similar
+    to [ South #327](http://south.aeracode.org/ticket/327) You will probably
+    need to generate a new schema migration if you are upgrading.
 
 * Version 0.1.0
     - Initial version

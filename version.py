@@ -47,21 +47,37 @@
 # second number: database changes
 # third number: code changes/patches
 
-__all__ = ("get_git_version")
-
 from subprocess import Popen, PIPE
 
+__all__ = ("get_git_version")
 
-def call_git_describe(abbrev=4):
+
+def call_git_describe(abbrev=5):
+    """
+    The `git describe --long` command outputs in the format of:
+
+        v1.0.4-14-g2414721
+
+    Where the fields are:
+
+        <tag>-<number of commits since tag>-<hash>
+
+    """
     try:
-        p = Popen(['git', 'describe', '--abbrev=%d' % abbrev],
-                  stdout=PIPE, stderr=PIPE)
+        p = Popen(['git', 'describe', '--long', '--tags', '--always',
+                   '--abbrev=%d' % abbrev], stdout=PIPE, stderr=PIPE)
         p.stderr.close()
-        line = p.stdout.readlines()[0]
-        return line.strip()
+        line = p.stdout.readlines()[0].strip()
 
+        tag, count, sha = line.split('-')
+        return tag, count, sha
+    except ValueError:
+        # This can happen if "No tags can describe" the SHA. We'll use 'line'
+        # which should now be the sha due to the --always flag
+        return None, '0', line
     except:
-        return None
+        # Unknown error. Not a git repo?
+        return (None, None, None)
 
 
 def read_release_version():
@@ -86,34 +102,53 @@ def write_release_version(version):
 
 
 def get_git_version(abbrev=4):
-    # Read in the version that's currently in RELEASE-VERSION.
+    """
+    Returns this project's version number based on the git repo's tags or from
+    the RELEASE-VERSION file if this is a packaged release without a .git
+    directory.
 
+    Calling this will update the RELEASE-VERSION file if the calculated version
+    number differs
+
+    Calculated dev version numbers (non-tagged commits) are PEP-426, PEP-440,
+    and pip compliant as long as the latest git tag is
+
+    https://www.python.org/dev/peps/pep-0440/
+
+    """
+    # Read in the version that's currently in RELEASE-VERSION.
     release_version = read_release_version()
 
     # First try to get the current version using "git describe".
+    tag, count, _ = call_git_describe(abbrev)
 
-    version = call_git_describe(abbrev)
-
-    # If that doesn't work, fall back on the value that's in
-    # RELEASE-VERSION.
-
-    if version is None:
+    if count == '0':
+        if tag:
+            # Normal tagged release
+            version = tag
+        else:
+            # This is an odd case where the git repo/branch can't find a tag
+            version = "0.dev0"
+    elif count:
+        # Non-zero count means a development release after the last tag
+        version = "{}.dev{}".format(tag, count)
+    else:
+        # Build count wasn't returned at all. Fall back on the value that's in
+        # the packaged RELEASE-VERSION file
         version = release_version
-
-    # If we still don't have anything, that's an error.
-
-    if version is None:
-        raise ValueError("Cannot find the version number!")
 
     # If the current version is different from what's in the
     # RELEASE-VERSION file, update the file to be current.
-
     if version != release_version:
         write_release_version(version)
 
     # Finally, return the current version.
-
     return version
+
+
+def get_git_hash():
+    _, _, sha = call_git_describe()
+    return sha
 
 if __name__ == "__main__":
     print get_git_version()

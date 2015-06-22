@@ -1,4 +1,10 @@
+.coverage
+coverage.xml
+htmlcov
+
 bin
+build
+dist
 include
 lib
 .Python
