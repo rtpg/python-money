@@ -146,6 +146,10 @@ always emulate the first two by using the underlying amounts:
 
 This makes the intention of the code more clear.
 
+As an exception to that, we allow diving a Money object by a number:
+
+    Money(9, 'USD') / 3 # Money(3, 'USD')
+
 
 Boolean Evaluation
 ------------------
