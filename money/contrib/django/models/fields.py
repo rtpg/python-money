@@ -4,7 +4,7 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 from money.contrib.django import forms
-from money import Money
+from money.money import Money
 
 __all__ = ('MoneyField', 'currency_field_name', 'NotSupportedLookup')
 
@@ -195,7 +195,7 @@ class MoneyField(InfiniteDecimalField):
 
         # Set our custom manager
         if not hasattr(cls, '_default_manager'):
-            from managers import MoneyManager
+            from .managers import MoneyManager
             cls.add_to_class('objects', MoneyManager())
 
     def get_db_prep_save(self, value, *args, **kwargs):

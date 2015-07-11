@@ -46,7 +46,7 @@ For example:
 
 There is a dict of all ISO-4217 currencies:
 
-    >>> from money import CURRENCY
+    >>> from money.money import CURRENCY
     >>> print CURRENCY['GBP'].name
     Pound Sterling
 
@@ -96,7 +96,7 @@ currencies. For example:
 This package assumes that you have a preferred default currency. Somewhere in
 your software's initialization you should set that currency:
 
-    >>> from money import set_default_currency
+    >>> from money.money import set_default_currency
     >>> set_default_currency(code='USD')
     >>> print Money(amount=23.45)
     USD 23.45

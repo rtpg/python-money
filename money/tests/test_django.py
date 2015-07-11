@@ -1,8 +1,12 @@
+from __future__ import unicode_literals
+
+from builtins import str
+
 import pytest
 
 from django.test import TestCase
 from django.db import IntegrityError
-from money import Money, CURRENCY
+from money.money import Money, CURRENCY
 from money.contrib.django.models.fields import NotSupportedLookup
 from money.tests.models import (
     SimpleMoneyModel,
@@ -15,12 +19,12 @@ from money.tests.models import (
 @pytest.mark.django_db
 class MoneyFieldTestCase(TestCase):
 
-    def assertSameCurrency(self, moneys, currency=None):
+    def assertSameCurrency(self, moneys, currency_code=None):
         """ Utility function to assert a collection of currencies are all the same """
-        currencies = set([m.currency for m in moneys])
-        self.assertTrue(len(currencies) == 1)
-        if currency:
-            self.assertEqual(currencies.pop().code, currency)
+        currency_codes = set([m.currency.code for m in moneys])
+        self.assertTrue(len(currency_codes) == 1)
+        if currency_code:
+            self.assertEqual(currency_codes.pop(), currency_code)
 
     def test_non_null(self):
         instance = SimpleMoneyModel()
@@ -212,22 +216,17 @@ class MoneyFieldTestCase(TestCase):
         e2 = SimpleMoneyModel(price=Money('200.0', 'JPY'))
 
         self.assertEqual(str(e1.price), "JPY 200")
-        self.assertEqual(unicode(e1.price), "JPY 200")
 
         self.assertEqual(str(e1.price.amount), "200")
-        self.assertEqual(unicode(e1.price.amount), "200")
 
         self.assertEqual(str(e2.price.amount), "200.0")
-        self.assertEqual(unicode(e2.price.amount), "200.0")
 
     def test_price_amount_to_string_non_money(self):
         e1 = MoneyModelDefaults()
 
         self.assertEqual(str(e1.price), "USD 123.45")
-        self.assertEqual(unicode(e1.price), "USD 123.45")
 
         self.assertEqual(str(e1.price.amount), "123.45")
-        self.assertEqual(unicode(e1.price.amount), "123.45")
 
     def test_zero_edge_case(self):
         created = SimpleMoneyModel.objects.create(name="zero dollars", price=Money(0, "USD"))

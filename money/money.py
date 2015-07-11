@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-from __future__ import division
-import six
+from __future__ import division, unicode_literals
 
-import exceptions
+from builtins import str
+
+import six
 
 from decimal import Decimal
 
@@ -43,11 +44,11 @@ CURRENCY['XXX'] = Currency(code="XXX", numeric="999")
 DEFAULT_CURRENCY = CURRENCY['XXX']
 
 
-class IncorrectMoneyInputError(exceptions.Exception):
+class IncorrectMoneyInputError(Exception):
     """Invalid input for the Money object"""
 
 
-class CurrencyMismatchException(exceptions.ArithmeticError):
+class CurrencyMismatchException(ArithmeticError):
     """Raised when an operation is not allowed between differing currencies"""
 
 
@@ -153,9 +154,6 @@ class Money(object):
 
     def __str__(self):
         return "{} {}".format(self._currency, self._amount)
-
-    def __unicode__(self):
-        return u"{} {}".format(self._currency, self._amount)
 
     def __repr__(self):
         return str(self)

@@ -46,6 +46,7 @@
 # first number: major business changes/milestones
 # second number: database changes
 # third number: code changes/patches
+from __future__ import unicode_literals
 
 from subprocess import Popen, PIPE
 
@@ -151,4 +152,4 @@ def get_git_hash():
     return sha
 
 if __name__ == "__main__":
-    print get_git_version()
+    print(get_git_version())

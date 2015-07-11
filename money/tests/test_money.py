@@ -1,7 +1,7 @@
 from decimal import Decimal
 from unittest import TestCase
 
-from money import (
+from money.money import (
     Money,
     CURRENCY,
     Currency,
