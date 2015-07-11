@@ -1,7 +1,5 @@
 from __future__ import unicode_literals
 
-from builtins import str
-
 from django.db import models
 from money.contrib.django.models import fields
 from money.money import Money
@@ -15,7 +13,7 @@ class SimpleMoneyModel(models.Model):
     price = fields.MoneyField(max_digits=12, decimal_places=3)
 
     def __str__(self):
-        return self.name + u" " + str(self.price)
+        return self.name + " " + str(self.price)
 
     class Meta:
         app_label = 'tests'
@@ -27,7 +25,7 @@ class MoneyModelDefaultMoneyUSD(models.Model):
     zero = fields.MoneyField(max_digits=12, decimal_places=3, default=Money("0", "USD"))
 
     def __str__(self):
-        return self.name + u" " + str(self.price)
+        return self.name + " " + str(self.price)
 
     class Meta:
         app_label = 'tests'
@@ -39,7 +37,7 @@ class MoneyModelDefaults(models.Model):
     zero = fields.MoneyField('Zero', max_digits=12, decimal_places=3, default="0", default_currency="USD")
 
     def __str__(self):
-        return self.name + u" " + str(self.price)
+        return self.name + " " + str(self.price)
 
     class Meta:
         app_label = 'tests'
@@ -51,7 +49,7 @@ class NullableMoneyModel(models.Model):
     price = fields.MoneyField(max_digits=12, decimal_places=3, null=True)
 
     def __str__(self):
-        return self.name + u" " + str(self.price)
+        return self.name + " " + str(self.price)
 
     class Meta:
         app_label = 'tests'

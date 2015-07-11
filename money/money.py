@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import division, unicode_literals
 
-from builtins import str
-
 import six
 
 from decimal import Decimal

@@ -1,7 +1,5 @@
 from __future__ import unicode_literals
 
-from builtins import str
-
 import pytest
 
 from django.test import TestCase

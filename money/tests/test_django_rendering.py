@@ -1,7 +1,5 @@
 from __future__ import unicode_literals
 
-from builtins import str
-
 import pytest
 
 from django.core.urlresolvers import reverse
@@ -96,7 +94,7 @@ class TestEditView(TestCase):
 
         # Find the object we created...
         obj = SimpleMoneyModel.objects.last()
-        self.assertEqual(str(obj.price), u"JPY 555.5")
+        self.assertEqual(str(obj.price), "JPY 555.5")
 
         self.assertContains(response, '|item:name|value:ABC|')
         self.assertContains(response, '|item:price|value:JPY 555.5|')

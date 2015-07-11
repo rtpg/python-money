@@ -1,7 +1,5 @@
 from __future__ import division, unicode_literals
 
-from builtins import str
-
 import pytest
 from decimal import Decimal
 
