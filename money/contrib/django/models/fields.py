@@ -13,8 +13,8 @@ def currency_field_name(name):
     return "%s_currency" % name
 
 
-def currency_field_db_column(db_column):
-    return "%s_currency" % db_column
+def currency_field_db_column(field_name, db_column):
+    return "%s_currency" % (db_column if db_column is not None else field_name)
 
 
 SUPPORTED_LOOKUPS = ('exact', 'lt', 'gt', 'lte', 'gte', 'isnull')
@@ -187,7 +187,7 @@ class MoneyField(InfiniteDecimalField):
                 editable=False,
                 null=False, # empty char fields should be ''
                 blank=self.blankable,
-                db_column=currency_field_db_column(self.db_column),
+                db_column=currency_field_db_column(self.currency_field_name, self.db_column),
             )
             # Use this field's creation counter for the currency field. This
             # field will get a +1 when we call super
