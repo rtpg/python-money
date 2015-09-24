@@ -1,7 +1,7 @@
 from decimal import Decimal
 
 from django.db import models
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext_lazy
 
 from money.contrib.django import forms
 from money import Money
@@ -22,6 +22,8 @@ SUPPORTED_LOOKUPS = ('exact', 'lt', 'gt', 'lte', 'gte', 'isnull')
 
 class NotSupportedLookup(TypeError):
     def __init__(self, lookup):
+        super(NotSupportedLookup, self).__init__()
+
         self.lookup = lookup
 
     def __str__(self):
@@ -129,7 +131,7 @@ class CurrencyField(models.CharField):
 
 
 class MoneyField(InfiniteDecimalField):
-    description = _('An amount and type of currency')
+    description = ugettext_lazy('An amount and type of currency')
 
     # Don't extend SubfieldBase since we need to have access to both fields when
     # to_python is called. We need our code there instead of subfieldBase
@@ -267,7 +269,7 @@ try:
     # See: https://bitbucket.org/carljm/django-markitup/changeset/eb788c807dd8
     # See: http://south.aeracode.org/docs/customfields.html
     add_introspection_rules(
-        patterns=["^money\.contrib\.django.\models\.fields\.MoneyField"],
+        patterns=[r"^money\.contrib\.django.\models\.fields\.MoneyField"],
         rules=[
             (
                 (MoneyField,),
@@ -277,7 +279,7 @@ try:
         ]
     )
     add_introspection_rules(
-        patterns=["^money\.contrib\.django.\models\.fields\.CurrencyField"],
+        patterns=[r"^money\.contrib\.django.\models\.fields\.CurrencyField"],
         rules=[]
     )
 except ImportError:
