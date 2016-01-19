@@ -260,12 +260,12 @@ class MoneyField(InfiniteDecimalField):
     @cached_property
     def validators(self):
         # purposefully jumping over the decimalfield validations
-        standard_field_validators = super(DecimalField, self).validators
+        standard_field_validators = super(models.DecimalField, self).validators
 
         # now to add the decimal validator back in, but this time only looking at amounts
         class AmountValidator(validators.DecimalValidator):
             def __call__(self, value):
-                return super(DecimalValidator, self)(value.amount)
+                return super(validators.DecimalValidator, self)(value.amount)
 
         return standard_field_validators + [ AmountValidator(self.max_digits, self.decimal_places)]
 
