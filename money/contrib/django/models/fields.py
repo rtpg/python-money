@@ -1,5 +1,6 @@
 from decimal import Decimal
 
+from django.core import validators
 from django.db import models
 from django.utils.translation import ugettext_lazy
 from django.utils.functional import cached_property
@@ -265,7 +266,7 @@ class MoneyField(InfiniteDecimalField):
         # now to add the decimal validator back in, but this time only looking at amounts
         class AmountValidator(validators.DecimalValidator):
             def __call__(self, value):
-                return super(validators.DecimalValidator, self)(value.amount)
+                return super(AmountValidator, self).__call__(value.amount)
 
         return standard_field_validators + [ AmountValidator(self.max_digits, self.decimal_places)]
 
