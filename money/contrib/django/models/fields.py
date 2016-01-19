@@ -2,6 +2,7 @@ from decimal import Decimal
 
 from django.db import models
 from django.utils.translation import ugettext_lazy
+from django.utils.functional import cached_property
 
 from money.contrib.django import forms
 from money import Money
@@ -256,6 +257,7 @@ class MoneyField(InfiniteDecimalField):
         defaults.update(kwargs)
         return super(MoneyField, self).formfield(**defaults)
 
+    @cached_property
     def validators(self):
         # purposefully jumping over the decimalfield validations
         standard_field_validators = super(DecimalField, self).validators
