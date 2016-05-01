@@ -81,5 +81,5 @@ class QuerysetWithMoney(QuerySet):
 
 
 class MoneyManager(models.Manager):
-    def get_query_set(self):
+    def get_queryset(self):
         return QuerysetWithMoney(self.model)

@@ -46,7 +46,7 @@
 # first number: major business changes/milestones
 # second number: database changes
 # third number: code changes/patches
-from __future__ import unicode_literals
+from __future__ import print_function, unicode_literals
 
 from subprocess import Popen, PIPE
 

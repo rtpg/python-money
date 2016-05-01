@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import division, unicode_literals
 
-import six
-
 from decimal import Decimal
+
+import six
 
 
 class Currency(object):
@@ -54,6 +54,7 @@ class InvalidOperationException(TypeError):
     """Raised when an operation is never allowed"""
 
 
+@six.python_2_unicode_compatible
 class Money(object):
     """
     An amount of money with an optional currency

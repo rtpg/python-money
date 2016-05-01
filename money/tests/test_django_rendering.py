@@ -11,7 +11,12 @@ from money.tests.models import (
     SimpleMoneyModel,
 )
 
-from money.tests.views import *
+from money.tests.views import (
+    instance_view,
+    model_form_view,
+    model_from_db_view,
+    model_view,
+)
 
 
 class TestView(TestCase):
@@ -64,7 +69,6 @@ class TestEditView(TestCase):
 
     def setUp(self):
         self.client = Client()
-
 
     def test_form_GET(self):
         url = reverse(model_form_view, kwargs={'amount': '987.00', 'currency': 'JPY'})

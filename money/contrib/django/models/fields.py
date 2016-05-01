@@ -93,7 +93,7 @@ class InfiniteDecimalField(models.DecimalField):
     def db_type(self, connection):
         engine = connection.settings_dict['ENGINE']
 
-        if 'psycopg2' in engine:
+        if 'postgresql' in engine:
             return 'numeric'
 
         return super(InfiniteDecimalField, self).db_type(connection=connection)
