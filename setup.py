@@ -56,7 +56,6 @@ dependency_links = []
 setup(
     name='python-money',
     version=get_git_version(),
-    source_label=get_git_hash(),
     description='Primitives for working with money and currencies in Python',
     url='http://github.com/poswald/python-money',
     maintainer='Paul Oswald',
