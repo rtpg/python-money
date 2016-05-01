@@ -64,24 +64,24 @@ class MoneyFieldProxy(object):
         return Money(amount, currency)
 
     def __set__(self, obj, value):
-        if value is None: # Money(0) is False
+        if value is None:  # Money(0) is False
             self._set_values(obj, None, '')
         elif isinstance(value, Money):
             self._set_values(obj, value.amount, value.currency)
         elif isinstance(value, Decimal):
-            _, currency = self._get_values(obj) # use what is currently set
+            _, currency = self._get_values(obj)  # use what is currently set
             self._set_values(obj, value, currency)
         else:
             # It could be an int, or some other python native type
             try:
                 amount = Decimal(str(value))
-                _, currency = self._get_values(obj) # use what is currently set
+                _, currency = self._get_values(obj)  # use what is currently set
                 self._set_values(obj, amount, currency)
             except TypeError:
                 # Lastly, assume string type 'XXX 123' or something Money can
                 # handle.
                 try:
-                    _, currency = self._get_values(obj) # use what is currently set
+                    _, currency = self._get_values(obj)  # use what is currently set
                     m = Money.from_string(str(value))
                     self._set_values(obj, m.amount, m.currency)
                 except TypeError:
@@ -135,7 +135,7 @@ class MoneyField(InfiniteDecimalField):
 
     # Don't extend SubfieldBase since we need to have access to both fields when
     # to_python is called. We need our code there instead of subfieldBase
-    #__metaclass__ = models.SubfieldBase
+    # __metaclass__ = models.SubfieldBase
 
     def __init__(self, *args, **kwargs):
         # We add the currency field except when using frozen south orm. See introspection rules below.
@@ -146,10 +146,10 @@ class MoneyField(InfiniteDecimalField):
         self.blankable = kwargs.get('blank', False)
 
         if isinstance(default, Money):
-            self.default_currency = default.currency # use the default's currency
+            self.default_currency = default.currency  # use the default's currency
             kwargs['default'] = default.amount
         else:
-            self.default_currency = default_currency or '' # use the kwarg passed in
+            self.default_currency = default_currency or ''  # use the kwarg passed in
 
         super(MoneyField, self).__init__(*args, **kwargs)
 
@@ -185,7 +185,7 @@ class MoneyField(InfiniteDecimalField):
                 max_length=3,
                 default=self.default_currency,
                 editable=False,
-                null=False, # empty char fields should be ''
+                null=False,  # empty char fields should be ''
                 blank=self.blankable,
                 db_column=currency_field_db_column(self.db_column),
             )

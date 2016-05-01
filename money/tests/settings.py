@@ -9,10 +9,10 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(TEST_DIR, 'static')
 
 DATABASES = {
-    #'default': {
-    #    'ENGINE': 'django.db.backends.sqlite3',
-    #    'NAME': ':memory:',
-    #},
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.sqlite3',
+    #     'NAME': ':memory:',
+    # },
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'money',

@@ -53,16 +53,16 @@ class MoneyFieldTestCase(TestCase):
         price = Money(100, "USD")
         SimpleMoneyModel.objects.create(name="one hundred dollars", price=price)
 
-        #Filter
+        # Filter
         qset = SimpleMoneyModel.objects.filter(price=price)
         self.assertEqual(qset.count(), 1)
         self.assertEqual(qset[0].price, price)
 
-        #Get
+        # Get
         entry = SimpleMoneyModel.objects.get(price=price)
         self.assertEqual(entry.price, price)
 
-        #test retrieving without currency
+        # test retrieving without currency
         entry = SimpleMoneyModel.objects.get(price=100)
         self.assertEqual(entry.price, price)
 
@@ -124,7 +124,7 @@ class MoneyFieldTestCase(TestCase):
         SimpleMoneyModel.objects.create(name="one hundred and one hrivnyas", price=UAH100 + 1)
         SimpleMoneyModel.objects.create(name="ninety nine hrivnyas", price=UAH100 - 1)
 
-        #Exact:
+        # Exact:
         qset = SimpleMoneyModel.objects.filter(price__exact=USD100)
         self.assertEqual(qset.count(), 1)
         qset = SimpleMoneyModel.objects.filter(price__exact=EUR100)
@@ -132,7 +132,7 @@ class MoneyFieldTestCase(TestCase):
         qset = SimpleMoneyModel.objects.filter(price__exact=UAH100)
         self.assertEqual(qset.count(), 1)
 
-        #Less than:
+        # Less than:
         qset = SimpleMoneyModel.objects.filter(price__lt=USD100)
         self.assertEqual(qset.count(), 1)
         self.assertEqual(qset[0].price, USD100 - 1)
@@ -145,7 +145,7 @@ class MoneyFieldTestCase(TestCase):
         self.assertEqual(qset.count(), 1)
         self.assertEqual(qset[0].price, UAH100 - 1)
 
-        #Greater than:
+        # Greater than:
         qset = SimpleMoneyModel.objects.filter(price__gt=USD100)
         self.assertEqual(qset.count(), 1)
         self.assertEqual(qset[0].price, USD100 + 1)
@@ -158,7 +158,7 @@ class MoneyFieldTestCase(TestCase):
         self.assertEqual(qset.count(), 1)
         self.assertEqual(qset[0].price, UAH100 + 1)
 
-        #Less than or equal:
+        # Less than or equal:
         qset = SimpleMoneyModel.objects.filter(price__lte=USD100)
         self.assertEqual(qset.count(), 2)
         self.assertSameCurrency([ent.price for ent in qset], "USD")
@@ -177,7 +177,7 @@ class MoneyFieldTestCase(TestCase):
         for ent in qset:
             self.assertTrue(ent.price.amount <= 100)
 
-        #Greater than or equal:
+        # Greater than or equal:
         qset = SimpleMoneyModel.objects.filter(price__gte=USD100)
         self.assertEqual(qset.count(), 2)
         self.assertSameCurrency([ent.price for ent in qset], "USD")

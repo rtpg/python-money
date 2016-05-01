@@ -27,7 +27,7 @@ class PyTest(TestCommand):
         self.test_suite = True
 
     def run_tests(self):
-        #import here, cause outside the eggs aren't loaded
+        # import here, cause outside the eggs aren't loaded
         import pytest
         errno = pytest.main(self.test_args)
         sys.exit(errno)
@@ -64,7 +64,6 @@ setup(
     platforms=["any"],
     keywords=keywords,
     long_description=README,
-    #test_suite='tests',
     packages=[
         'money',
     ],
