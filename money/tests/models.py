@@ -1,53 +1,62 @@
+from __future__ import unicode_literals
+
+import six
+
 from django.db import models
+
 from money.contrib.django.models import fields
-from money import Money
+from money.money import Money
 
 
 # Tests for Django models. We set up three types of models with different
 # ways of specifying defaults
+@six.python_2_unicode_compatible
 class SimpleMoneyModel(models.Model):
     name = models.CharField(max_length=100)
 
     price = fields.MoneyField(max_digits=12, decimal_places=3)
 
-    def __unicode__(self):
-        return self.name + u" " + unicode(self.price)
+    def __str__(self):
+        return self.name + " " + str(self.price)
 
     class Meta:
         app_label = 'tests'
 
 
+@six.python_2_unicode_compatible
 class MoneyModelDefaultMoneyUSD(models.Model):
     name = models.CharField(max_length=100)
     price = fields.MoneyField(max_digits=12, decimal_places=3, default=Money("123.45", "USD"))
     zero = fields.MoneyField(max_digits=12, decimal_places=3, default=Money("0", "USD"))
 
-    def __unicode__(self):
-        return self.name + u" " + unicode(self.price)
+    def __str__(self):
+        return self.name + " " + str(self.price)
 
     class Meta:
         app_label = 'tests'
 
 
+@six.python_2_unicode_compatible
 class MoneyModelDefaults(models.Model):
     name = models.CharField('Name', max_length=100)
     price = fields.MoneyField('Price', max_digits=12, decimal_places=3, default="123.45", default_currency="USD")
     zero = fields.MoneyField('Zero', max_digits=12, decimal_places=3, default="0", default_currency="USD")
 
-    def __unicode__(self):
-        return self.name + u" " + unicode(self.price)
+    def __str__(self):
+        return self.name + " " + str(self.price)
 
     class Meta:
         app_label = 'tests'
 
 
+@six.python_2_unicode_compatible
 class NullableMoneyModel(models.Model):
     name = models.CharField(max_length=100)
 
     price = fields.MoneyField(max_digits=12, decimal_places=3, null=True)
 
-    def __unicode__(self):
-        return self.name + u" " + unicode(self.price)
+    def __str__(self):
+        return self.name + " " + str(self.price)
 
     class Meta:
         app_label = 'tests'

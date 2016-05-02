@@ -12,6 +12,7 @@ RELEASE-VERSION
 dist
 *.egg-info
 *.egg
+*.eggs
 *.komodoproject
 *.esproj
 *.pyc

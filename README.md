@@ -1,9 +1,7 @@
-
 python-money
 ============
 
 Primitives for working with money and currencies in Python
-
 
 Compatibility
 =============
@@ -19,7 +17,6 @@ postgres specific field, and a `py.test` based test suite among other changes.
 You are free to use this version but please look at other forks as well as they
 may better suit your use case.
 
-
 Installation
 ============
 
@@ -28,7 +25,6 @@ You can install this project directly from the git repository using pip:
     $ pip install -e git+http://github.com/poswald/python-money.git@0.0.1#egg=python-money
 
 You do not have to specify the version number but it might be a good idea.
-
 
 Usage
 =====
@@ -44,16 +40,16 @@ For example:
 
     Currency(code='BZD', numeric='084', name='Belize Dollar', countries=['BELIZE'])
 
-There is a dict of all ISO-4217 currencies:
+There is a dictionary of all ISO-4217 currencies:
 
-    >>> from money import CURRENCY
+    >>> from money.money import CURRENCY
     >>> print CURRENCY['GBP'].name
     Pound Sterling
 
 ### Money Class
 
 The Money class is available for doing arithmetic on values in defined
-currencies. It wraps the python Decimal type and gives you several convienience
+currencies. It wraps the python Decimal type and gives you several convenience
 methods. Using this prevents you from making mistakes like adding Pounds and
 Dollars together, multiplying two money values or comparing different
 currencies. For example:
@@ -96,7 +92,7 @@ currencies. For example:
 This package assumes that you have a preferred default currency. Somewhere in
 your software's initialization you should set that currency:
 
-    >>> from money import set_default_currency
+    >>> from money.money import set_default_currency
     >>> set_default_currency(code='USD')
     >>> print Money(amount=23.45)
     USD 23.45
@@ -106,19 +102,12 @@ If you don't you will get a non-specified 'XXX' currency:
     >>> print Money(amount=23.45)
     XXX 23.45
 
-There is also an exchange rate that may be set:
-
-This default currency and exchange rate is used for arithmetic addition. If you
-add two monetary values that are in differing currency, they will first be
-converted into the default currency, and then added together.
-
-
 A Note About Equality and Math Operations
 -----------------------------------------
 
-The way equlity is currently implemented, `USD 0` is not equal to `EUR 0` however,
+The way equality is currently implemented, `USD 0` is not equal to `EUR 0` however,
 `USD 0` is considered equal to `0`. This means you can only compare similar
-currencies to each other, but it is safe to compare a currancy to the value `0`.
+currencies to each other, but it is safe to compare a currency to the value `0`.
 
 Comparing two differing currencies is undefined and will raise
 a `money.CurrencyMismatchException`. Prior versions of this project would do an
@@ -132,7 +121,7 @@ example, `Money(10, 'USD') - Money(3, 'JPY')` is not allowed due to differing
 currencies.
 
 Both `Money(3, 'USD') * Money(3, 'USD')` and `Money(9, 'USD') / Money(3, 'USD')`
-are undefined. There are 3 conceiveable ways to handle division:
+are undefined. There are 3 conceivable ways to handle division:
 
     Money(9, 'USD') / Money(3, 'USD') # Money(3, 'XXX') # where 'XXX' denotes undefined currency
     Money(9, 'USD') / Money(3, 'USD') # Decimal('3')
@@ -164,11 +153,10 @@ python `Decimal` class:
     bool(Money('0.01', 'USD')) # True
     bool(Money('1'))           # True
 
-To test for the existance of the objects, compare the value to `None`:
+To test for the existence of the objects, compare the value to `None`:
 
     if amount is None:
         amount = Money(0)
-
 
 Django
 ======
@@ -188,9 +176,9 @@ the Django DecimalField:
         price = MoneyField(default=0, max_digits=12, decimal_places=2)
         ...
 
-Now run ./manage.py dbsync or South migrate. Your database table will contain a
+Now run `./manage.py dbsync` or South migrate. Your database table will contain a
 field for holding the value and a second field for the currency type. In
-postgresql it might look like this:
+PostgreSQL it might look like this:
 
     price          | numeric(12,2)          | not null default NULL::numeric
     price_currency | character varying(3)   | not null
@@ -205,22 +193,22 @@ The value you get from your model will be a `Money` class:
 ### User Defined Precision of Decimals in Postgres
 
 It can be difficult to represent decimals exactly as the user entered them with
-django. If you use postgres, you can preserve the user's entered precision by
-using the Postgresql `numeric` type. Simply use the `InfiniteDecimalField`
+Django. If you use postgres, you can preserve the user's entered precision by
+using the PostgreSQL `numeric` type. Simply use the `InfiniteDecimalField`
 class and the value will be stored as entered by the user without having to
 define the precision in the model class.
 
     InfiniteDecimalField
 
-This allows you to store and later retreive a values like `3`, `3.0`, and
+This allows you to store and later retrieve a values like `3`, `3.0`, and
 `3.000` without losing the precision. The `MoneyField` class already extends this
 by default.
 
 
 ### Fixtures
 
-When loading from or searializing to fixtures, the field class expects the values
-to be specified separately:
+When loading from or serializing to fixtures, the field class expects the
+values to be specified separately:
 
     ...
     {
@@ -243,7 +231,7 @@ The form field used by the `models.MoneyField` is also called `MoneyField`
 
 ### Running Tests
 
-The test suite requires `py.test`, `django` and several other libaries to be
+The test suite requires `py.test`, `django` and several other libraries to be
 installed. They will be downloaded and installed automatically when run.
 
 Tests can be run via the `setup.py` script:

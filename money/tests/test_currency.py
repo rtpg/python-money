@@ -1,4 +1,4 @@
-from money import (
+from money.money import (
     Currency,
 )
 

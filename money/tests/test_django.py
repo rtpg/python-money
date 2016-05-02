@@ -1,8 +1,10 @@
+from __future__ import unicode_literals
+
 import pytest
 
 from django.test import TestCase
 from django.db import IntegrityError
-from money import Money, CURRENCY
+from money.money import Money, CURRENCY
 from money.contrib.django.models.fields import NotSupportedLookup
 from money.tests.models import (
     SimpleMoneyModel,
@@ -15,12 +17,12 @@ from money.tests.models import (
 @pytest.mark.django_db
 class MoneyFieldTestCase(TestCase):
 
-    def assertSameCurrency(self, moneys, currency=None):
+    def assertSameCurrency(self, moneys, currency_code=None):
         """ Utility function to assert a collection of currencies are all the same """
-        currencies = set([m.currency for m in moneys])
-        self.assertTrue(len(currencies) == 1)
-        if currency:
-            self.assertEqual(currencies.pop().code, currency)
+        currency_codes = set([m.currency.code for m in moneys])
+        self.assertTrue(len(currency_codes) == 1)
+        if currency_code:
+            self.assertEqual(currency_codes.pop(), currency_code)
 
     def test_non_null(self):
         instance = SimpleMoneyModel()
@@ -31,7 +33,7 @@ class MoneyFieldTestCase(TestCase):
         ind = 0
         for code, currency in CURRENCY.items():
             ind = ind + 1
-            price = Money(ind*1000.0, code)
+            price = Money(ind * 1000.0, code)
             SimpleMoneyModel.objects.create(name=currency.name, price=price.amount, price_currency=price.currency)
         count = SimpleMoneyModel.objects.all().count()
         self.assertEqual(len(CURRENCY), count)
@@ -51,16 +53,16 @@ class MoneyFieldTestCase(TestCase):
         price = Money(100, "USD")
         SimpleMoneyModel.objects.create(name="one hundred dollars", price=price)
 
-        #Filter
+        # Filter
         qset = SimpleMoneyModel.objects.filter(price=price)
         self.assertEqual(qset.count(), 1)
         self.assertEqual(qset[0].price, price)
 
-        #Get
+        # Get
         entry = SimpleMoneyModel.objects.get(price=price)
         self.assertEqual(entry.price, price)
 
-        #test retrieving without currency
+        # test retrieving without currency
         entry = SimpleMoneyModel.objects.get(price=100)
         self.assertEqual(entry.price, price)
 
@@ -68,42 +70,42 @@ class MoneyFieldTestCase(TestCase):
         price = Money(100, "USD")
         ent = SimpleMoneyModel(name='test', price=price.amount, price_currency=price.currency)
         ent.save()
-        self.assertEquals(ent.price, Money(100, "USD"))
+        self.assertEqual(ent.price, Money(100, "USD"))
 
         ent.price = Money(10, "USD")
         ent.save()
-        self.assertEquals(ent.price, Money(10, "USD"))
+        self.assertEqual(ent.price, Money(10, "USD"))
 
         ent_same = SimpleMoneyModel.objects.get(pk=ent.id)
-        self.assertEquals(ent_same.price, Money(10, "USD"))
+        self.assertEqual(ent_same.price, Money(10, "USD"))
 
-    def test_retreive_and_update(self):
+    def test_retrieve_and_update(self):
         created = SimpleMoneyModel.objects.create(name="one hundred dollars", price=Money(100, "USD"))
         created.save()
-        self.assertEquals(created.price, Money(100, "USD"))
+        self.assertEqual(created.price, Money(100, "USD"))
 
         ent = SimpleMoneyModel.objects.filter(price__exact=Money(100, "USD")).get()
-        self.assertEquals(ent.price, Money(100, "USD"))
+        self.assertEqual(ent.price, Money(100, "USD"))
 
         ent.price = Money(300, "USD")
         ent.save()
 
         ent = SimpleMoneyModel.objects.filter(price__exact=Money(300, "USD")).get()
-        self.assertEquals(ent.price, Money(300, "USD"))
+        self.assertEqual(ent.price, Money(300, "USD"))
 
     def test_defaults_as_money_objects(self):
         ent = MoneyModelDefaultMoneyUSD.objects.create(name='123.45 USD')
-        self.assertEquals(ent.price, Money('123.45', 'USD'))
+        self.assertEqual(ent.price, Money('123.45', 'USD'))
 
         ent = MoneyModelDefaultMoneyUSD.objects.get(pk=ent.id)
-        self.assertEquals(ent.price, Money('123.45', 'USD'))
+        self.assertEqual(ent.price, Money('123.45', 'USD'))
 
     def test_defaults_as_separate_values(self):
         ent = MoneyModelDefaults.objects.create(name='100 USD', price=100)
-        self.assertEquals(ent.price, Money(100, 'USD'))
+        self.assertEqual(ent.price, Money(100, 'USD'))
 
         ent = MoneyModelDefaults.objects.get(pk=ent.id)
-        self.assertEquals(ent.price, Money(100, 'USD'))
+        self.assertEqual(ent.price, Money(100, 'USD'))
 
     def test_lookup(self):
         USD100 = Money(100, "USD")
@@ -111,18 +113,18 @@ class MoneyFieldTestCase(TestCase):
         UAH100 = Money(100, "UAH")
 
         SimpleMoneyModel.objects.create(name="one hundred dollars", price=USD100)
-        SimpleMoneyModel.objects.create(name="one hundred and one dollars", price=USD100+1)
-        SimpleMoneyModel.objects.create(name="ninety nine dollars", price=USD100-1)
+        SimpleMoneyModel.objects.create(name="one hundred and one dollars", price=USD100 + 1)
+        SimpleMoneyModel.objects.create(name="ninety nine dollars", price=USD100 - 1)
 
         SimpleMoneyModel.objects.create(name="one hundred euros", price=EUR100)
-        SimpleMoneyModel.objects.create(name="one hundred and one euros", price=EUR100+1)
-        SimpleMoneyModel.objects.create(name="ninety nine euros", price=EUR100-1)
+        SimpleMoneyModel.objects.create(name="one hundred and one euros", price=EUR100 + 1)
+        SimpleMoneyModel.objects.create(name="ninety nine euros", price=EUR100 - 1)
 
         SimpleMoneyModel.objects.create(name="one hundred hrivnyas", price=UAH100)
-        SimpleMoneyModel.objects.create(name="one hundred and one hrivnyas", price=UAH100+1)
-        SimpleMoneyModel.objects.create(name="ninety nine hrivnyas", price=UAH100-1)
+        SimpleMoneyModel.objects.create(name="one hundred and one hrivnyas", price=UAH100 + 1)
+        SimpleMoneyModel.objects.create(name="ninety nine hrivnyas", price=UAH100 - 1)
 
-        #Exact:
+        # Exact:
         qset = SimpleMoneyModel.objects.filter(price__exact=USD100)
         self.assertEqual(qset.count(), 1)
         qset = SimpleMoneyModel.objects.filter(price__exact=EUR100)
@@ -130,33 +132,33 @@ class MoneyFieldTestCase(TestCase):
         qset = SimpleMoneyModel.objects.filter(price__exact=UAH100)
         self.assertEqual(qset.count(), 1)
 
-        #Less than:
+        # Less than:
         qset = SimpleMoneyModel.objects.filter(price__lt=USD100)
         self.assertEqual(qset.count(), 1)
-        self.assertEqual(qset[0].price, USD100-1)
+        self.assertEqual(qset[0].price, USD100 - 1)
 
         qset = SimpleMoneyModel.objects.filter(price__lt=EUR100)
         self.assertEqual(qset.count(), 1)
-        self.assertEqual(qset[0].price, EUR100-1)
+        self.assertEqual(qset[0].price, EUR100 - 1)
 
         qset = SimpleMoneyModel.objects.filter(price__lt=UAH100)
         self.assertEqual(qset.count(), 1)
-        self.assertEqual(qset[0].price, UAH100-1)
+        self.assertEqual(qset[0].price, UAH100 - 1)
 
-        #Greater than:
+        # Greater than:
         qset = SimpleMoneyModel.objects.filter(price__gt=USD100)
         self.assertEqual(qset.count(), 1)
-        self.assertEqual(qset[0].price, USD100+1)
+        self.assertEqual(qset[0].price, USD100 + 1)
 
         qset = SimpleMoneyModel.objects.filter(price__gt=EUR100)
         self.assertEqual(qset.count(), 1)
-        self.assertEqual(qset[0].price, EUR100+1)
+        self.assertEqual(qset[0].price, EUR100 + 1)
 
         qset = SimpleMoneyModel.objects.filter(price__gt=UAH100)
         self.assertEqual(qset.count(), 1)
-        self.assertEqual(qset[0].price, UAH100+1)
+        self.assertEqual(qset[0].price, UAH100 + 1)
 
-        #Less than or equal:
+        # Less than or equal:
         qset = SimpleMoneyModel.objects.filter(price__lte=USD100)
         self.assertEqual(qset.count(), 2)
         self.assertSameCurrency([ent.price for ent in qset], "USD")
@@ -175,7 +177,7 @@ class MoneyFieldTestCase(TestCase):
         for ent in qset:
             self.assertTrue(ent.price.amount <= 100)
 
-        #Greater than or equal:
+        # Greater than or equal:
         qset = SimpleMoneyModel.objects.filter(price__gte=USD100)
         self.assertEqual(qset.count(), 2)
         self.assertSameCurrency([ent.price for ent in qset], "USD")
@@ -212,29 +214,24 @@ class MoneyFieldTestCase(TestCase):
         e2 = SimpleMoneyModel(price=Money('200.0', 'JPY'))
 
         self.assertEqual(str(e1.price), "JPY 200")
-        self.assertEqual(unicode(e1.price), "JPY 200")
 
         self.assertEqual(str(e1.price.amount), "200")
-        self.assertEqual(unicode(e1.price.amount), "200")
 
         self.assertEqual(str(e2.price.amount), "200.0")
-        self.assertEqual(unicode(e2.price.amount), "200.0")
 
     def test_price_amount_to_string_non_money(self):
         e1 = MoneyModelDefaults()
 
         self.assertEqual(str(e1.price), "USD 123.45")
-        self.assertEqual(unicode(e1.price), "USD 123.45")
 
         self.assertEqual(str(e1.price.amount), "123.45")
-        self.assertEqual(unicode(e1.price.amount), "123.45")
 
     def test_zero_edge_case(self):
         created = SimpleMoneyModel.objects.create(name="zero dollars", price=Money(0, "USD"))
-        self.assertEquals(created.price, Money(0, "USD"))
+        self.assertEqual(created.price, Money(0, "USD"))
 
         ent = SimpleMoneyModel.objects.filter(price__exact=Money(0, "USD")).get()
-        self.assertEquals(ent.price, Money(0, "USD"))
+        self.assertEqual(ent.price, Money(0, "USD"))
 
     def test_unsupported_lookup(self):
         with pytest.raises(NotSupportedLookup):
@@ -247,22 +244,22 @@ class MoneyFieldTestCase(TestCase):
         # can be removed as well.
 
         created = SimpleMoneyModel.objects.create(name="zero dollars", price=Money(0))
-        self.assertEquals(created.price_currency, "XXX")
-        self.assertEquals(created.price.currency, "XXX")
+        self.assertEqual(created.price_currency, "XXX")
+        self.assertEqual(created.price.currency, "XXX")
 
         created = SimpleMoneyModel.objects.create(name="zero dollars", price=Money(0, "USD"))
-        self.assertEquals(created.price_currency, "USD")
-        self.assertEquals(created.price.currency, "USD")
+        self.assertEqual(created.price_currency, "USD")
+        self.assertEqual(created.price.currency, "USD")
 
         # This actually wouldn't work in the old code without a round trip to the db
         created.price_currency = 'EUR'
-        self.assertEquals(created.price_currency, "EUR")
-        self.assertEquals(created.price.currency, "EUR")
+        self.assertEqual(created.price_currency, "EUR")
+        self.assertEqual(created.price.currency, "EUR")
 
         created.save()
         created = SimpleMoneyModel.objects.get(pk=created.pk)
-        self.assertEquals(created.price_currency, "EUR")
-        self.assertEquals(created.price.currency, "EUR")
+        self.assertEqual(created.price_currency, "EUR")
+        self.assertEqual(created.price.currency, "EUR")
 
 
 @pytest.mark.django_db
@@ -270,18 +267,18 @@ class TestNullability(TestCase):
 
     def test_nullable_model_instance(self):
         instance = NullableMoneyModel()
-        self.assertEquals(instance.price, None)
+        self.assertEqual(instance.price, None)
 
     def test_nullable_model_save(self):
         instance = NullableMoneyModel()
         instance.save()
-        self.assertEquals(instance.price, None)
+        self.assertEqual(instance.price, None)
 
     def test_nullable_model_create_and_lookup(self):
         name = "test_nullable_model_create_and_lookup"
         NullableMoneyModel.objects.create(name=name)
         instance = NullableMoneyModel.objects.get(name=name)
-        self.assertEquals(instance.price, None)
+        self.assertEqual(instance.price, None)
 
     def test_nullable_model_lookup_by_null_amount(self):
         name = "test_nullable_model_lookup_by_null_amount"
@@ -289,7 +286,7 @@ class TestNullability(TestCase):
 
         # Assert NULL currency has "blank" currency
         instance = NullableMoneyModel.objects.filter(price_currency='')[0]
-        self.assertEquals(instance.name, name)
+        self.assertEqual(instance.name, name)
 
     def test_nullable_model_lookup_by_null_currency(self):
         name = "test_nullable_model_lookup_by_null_currency"
@@ -297,26 +294,26 @@ class TestNullability(TestCase):
 
         # Assert NULL currency has "blank" currency
         instance = NullableMoneyModel.objects.filter(price__isnull=True)[0]
-        self.assertEquals(instance.name, name)
+        self.assertEqual(instance.name, name)
 
     def test_nullable_null_currency_vs_undefined_currency(self):
         name = "test_nullable_null_currency_vs_undefined_currency"
-        NullableMoneyModel.objects.create(name=name+"_null", price=None)
-        NullableMoneyModel.objects.create(name=name+"_undefined", price=Money(0))
-        self.assertEquals(NullableMoneyModel.objects.all().count(), 2)
+        NullableMoneyModel.objects.create(name=name + "_null", price=None)
+        NullableMoneyModel.objects.create(name=name + "_undefined", price=Money(0))
+        self.assertEqual(NullableMoneyModel.objects.all().count(), 2)
 
         # Assert NULL currency has "blank" currency
-        self.assertEquals(NullableMoneyModel.objects.filter(price__isnull=True).count(), 1)
+        self.assertEqual(NullableMoneyModel.objects.filter(price__isnull=True).count(), 1)
         null_instance = NullableMoneyModel.objects.filter(price__isnull=True)[0]
-        self.assertEquals(null_instance.name, name + "_null")
+        self.assertEqual(null_instance.name, name + "_null")
         null_instance = NullableMoneyModel.objects.filter(price_currency='')[0]
-        self.assertEquals(null_instance.name, name + "_null")
+        self.assertEqual(null_instance.name, name + "_null")
 
-        self.assertEquals(NullableMoneyModel.objects.filter(price__isnull=False).count(), 1)
+        self.assertEqual(NullableMoneyModel.objects.filter(price__isnull=False).count(), 1)
         undefined_instance = NullableMoneyModel.objects.filter(price__isnull=False)[0]
-        self.assertEquals(undefined_instance.name, name+"_undefined")
+        self.assertEqual(undefined_instance.name, name + "_undefined")
         undefined_instance = NullableMoneyModel.objects.filter(price_currency='XXX')[0]
-        self.assertEquals(undefined_instance.name, name + "_undefined")
+        self.assertEqual(undefined_instance.name, name + "_undefined")
 
 
 @pytest.mark.django_db
