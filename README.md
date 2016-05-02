@@ -265,7 +265,16 @@ TODO
 CHANGELOG
 ===
 
-* Version 1.0.0
+* Version 1.1
+
+    - Python 3 compatibility
+    - Fix queryset returning the wrong value when running in Django 1.8
+
+* Version 1.0.1 (tagged 0.3.3)
+
+    - Add support or the `db_column` parameter
+
+* Version 1.0.0 (tagged 0.3.2)
 
     Note: This fork of the project is now going to be version-managed separate
     from other forks. This is the first release that we consider to be fully
