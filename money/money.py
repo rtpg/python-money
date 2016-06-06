@@ -91,10 +91,10 @@ class Money(object):
         s = str(value).strip()
         try:
             amount = Decimal(s)
-            currency = DEFAULT_CURRENCY
+            currency = DEFAULT_CURRENCY.code
         except:
             try:
-                currency = CURRENCY[s[:3].upper()]
+                currency = CURRENCY[s[:3].upper()].code  # assert that the substring is a correct currency
                 amount = Decimal(s[3:].strip())
             except:
                 raise IncorrectMoneyInputError("The value '%s' is not properly formatted as 'XXX 123.45' " % s)
