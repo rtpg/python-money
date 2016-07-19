@@ -14,6 +14,7 @@ class TestForm(forms.Form):
 class TestModelForm(forms.ModelForm):
     class Meta:
         model = SimpleMoneyModel
+        fields = '__all__'
 
 
 def instance_view(request):
