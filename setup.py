@@ -38,7 +38,7 @@ keywords = 'money currency finance'.split()
 tests_require = [
     'pytest-django',
     'pytest-cov',
-    'django<1.9',
+    'django==1.9',
     'psycopg2',
     'six',
 ]
@@ -48,7 +48,7 @@ requirements = [
 ]
 
 extras_require = {
-    'django':  ['Django < 1.8', ],
+    'django':  ['Django==1.9', ],
 }
 
 dependency_links = []
