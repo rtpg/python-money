@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import pytest
 
 from django.core.urlresolvers import reverse
@@ -9,7 +11,12 @@ from money.tests.models import (
     SimpleMoneyModel,
 )
 
-from money.tests.views import *
+from money.tests.views import (
+    instance_view,
+    model_form_view,
+    model_from_db_view,
+    model_view,
+)
 
 
 class TestView(TestCase):
@@ -63,7 +70,6 @@ class TestEditView(TestCase):
     def setUp(self):
         self.client = Client()
 
-
     def test_form_GET(self):
         url = reverse(model_form_view, kwargs={'amount': '987.00', 'currency': 'JPY'})
         response = self.client.get(url)
@@ -92,7 +98,7 @@ class TestEditView(TestCase):
 
         # Find the object we created...
         obj = SimpleMoneyModel.objects.last()
-        self.assertEqual(unicode(obj.price), u"JPY 555.5")
+        self.assertEqual(str(obj.price), "JPY 555.5")
 
         self.assertContains(response, '|item:name|value:ABC|')
         self.assertContains(response, '|item:price|value:JPY 555.5|')
