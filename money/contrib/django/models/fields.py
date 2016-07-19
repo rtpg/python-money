@@ -256,11 +256,12 @@ class MoneyField(InfiniteDecimalField):
         defaults.update(kwargs)
         return super(MoneyField, self).formfield(**defaults)
 
+    @property
     def validators(self):
         # Hack around the fact that we inherit from DecimalField but don't hold
         # Decimals. The real fix is to stop inheriting from DecimalField. *Not*
         # recommending this for use in a production setting.
-        pass
+        return []
 
 
 # South introspection rules
