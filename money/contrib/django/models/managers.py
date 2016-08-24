@@ -1,6 +1,6 @@
 from django.db import models
 from django.db.models.query import QuerySet
-from django.utils.encoding import smart_unicode
+from django.utils.encoding import smart_text as smart_unicode
 from .fields import currency_field_name
 
 __all__ = ('QuerysetWithMoney', 'MoneyManager',)
