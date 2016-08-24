@@ -1,5 +1,5 @@
 from django import forms
-from widgets import CurrencySelectWidget
+from .widgets import CurrencySelectWidget
 
 from money import Money, CURRENCY
 

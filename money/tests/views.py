@@ -32,7 +32,7 @@ def model_from_db_view(request, amount='0', currency='XXX'):
     instance = SimpleMoneyModel.objects.create(price=Money(amount, currency))
     instance = SimpleMoneyModel.objects.get(pk=instance.pk)
 
-    print instance, instance.pk
+    print(instance, instance.pk)
 
     money = instance.price
     return render_to_response('view.html', {'money': money})
@@ -55,7 +55,7 @@ def model_form_view(request, amount='0', currency='XXX'):
 def regular_form(request):
     if request.method == 'POST':
         form = TestForm(request.POST)
-        print form.is_valid()
+        print(form.is_valid())
         if form.is_valid():
             price = form.cleaned_data['price']
             return render_to_response('form.html', {'price':price} )
@@ -67,7 +67,7 @@ def regular_form_edit(request, id):
     instance = get_object_or_404(SimpleMoneyModel, pk=id)
     if request.method == 'POST':
         form = TestForm(request.POST, initial={'price':instance.price})
-        print form.is_valid()
+        print(form.is_valid())
         if form.is_valid():
             price = form.cleaned_data['price']
             return render_to_response('form.html', {'price':price} )
@@ -81,7 +81,7 @@ def model_form_edit(request, id):
     instance = get_object_or_404(SimpleMoneyModel, pk=id)
     if request.method == 'POST':
         form = TestModelForm(request.POST, instance=instance)
-        print form.is_valid()
+        print(form.is_valid())
         if form.is_valid():
             price = form.cleaned_data['price']
             form.save()

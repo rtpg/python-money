@@ -151,4 +151,4 @@ def get_git_hash():
     return sha
 
 if __name__ == "__main__":
-    print get_git_version()
+    print(get_git_version())
