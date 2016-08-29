@@ -1,9 +1,9 @@
-from __future__ import division
+from __future__ import division, unicode_literals
 
 import pytest
 from decimal import Decimal
 
-from money import Money, CurrencyMismatchException
+from money.money import Money, CurrencyMismatchException
 
 
 MONEY_STRINGS = [
@@ -30,11 +30,6 @@ MONEY_STRINGS = [
 @pytest.mark.parametrize("value,expected", MONEY_STRINGS)
 def test_str(value, expected):
     assert str(value) == expected
-
-
-@pytest.mark.parametrize("value,expected", MONEY_STRINGS)
-def test_unicode(value, expected):
-    assert unicode(value) == expected
 
 
 @pytest.mark.parametrize("value,expected", MONEY_STRINGS)

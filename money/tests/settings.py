@@ -9,15 +9,29 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(TEST_DIR, 'static')
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': ':memory:',
-    },
     # 'default': {
-    #     'ENGINE': 'django.db.backends.postgresql_psycopg2',
-    #     'NAME': 'money',
-    # }
+    #     'ENGINE': 'django.db.backends.sqlite3',
+    #     'NAME': ':memory:',
+    # },
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'money',
+        'USER': '',
+        'PASSWORD': '',
+    }
 }
+
+
+if os.environ.get('CIRCLECI'):
+    DATABASES['default']['USER'] = 'ubuntu'
+elif os.environ.get('TRAVIS'):
+    DATABASES['default']['USER'] = 'postgres'
+elif os.environ.get('SNAP_CI'):
+    DATABASES['default']['USER'] = os.environ['SNAP_DB_PG_USER']
+    DATABASES['default']['PASSWORD'] = os.environ['SNAP_DB_PG_PASSWORD']
+    DATABASES['default']['HOST'] = os.environ['SNAP_DB_PG_HOST']
+    DATABASES['default']['PORT'] = os.environ['SNAP_DB_PG_PORT']
+
 
 INSTALLED_APPS = (
     'money',
