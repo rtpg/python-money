@@ -259,8 +259,7 @@ class MoneyField(InfiniteDecimalField):
     @property
     def validators(self):
         # Hack around the fact that we inherit from DecimalField but don't hold
-        # Decimals. The real fix is to stop inheriting from DecimalField. *Not*
-        # recommending this for use in a production setting.
+        # Decimals. The real fix is to stop inheriting from DecimalField.
         return []
 
 
