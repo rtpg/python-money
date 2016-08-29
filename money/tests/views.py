@@ -15,6 +15,7 @@ class SampleForm(forms.Form):
 class SampleModelForm(forms.ModelForm):
     class Meta:
         model = SimpleMoneyModel
+        fields = '__all__'
 
         fields = (
             'name',
