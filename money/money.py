@@ -361,7 +361,7 @@ CURRENCY['MAD'] = Currency(code='MAD', numeric='504', decimals=2, symbol=u'', na
 CURRENCY['MDL'] = Currency(code='MDL', numeric='498', decimals=2, symbol=u'', name=u'Moldovan Leu', countries=[u'MOLDOVA, REPUBLIC OF'])
 CURRENCY['MGA'] = Currency(code='MGA', numeric='969', decimals=2, symbol=u'', name=u'Malagasy Ariary', countries=[u'MADAGASCAR'])
 CURRENCY['MKD'] = Currency(code='MKD', numeric='807', decimals=2, symbol=u'ден', name=u'Denar', countries=[u'MACEDONIA, THE FORMER YUGOSLAV REPUBLIC OF'])
-CURRENCY['MMK'] = Currency(code='MMK', numeric='104', decimals=2, symbol=u'', name=u'Kyat', countries=[u'MYANMAR'])
+CURRENCY['MMK'] = Currency(code='MMK', numeric='104', decimals=2, symbol=u'K', name=u'Kyat', countries=[u'MYANMAR'])
 CURRENCY['MNT'] = Currency(code='MNT', numeric='496', decimals=2, symbol=u'₮', name=u'Tugrik', countries=[u'MONGOLIA'])
 CURRENCY['MOP'] = Currency(code='MOP', numeric='446', decimals=2, symbol=u'', name=u'Pataca', countries=[u'MACAO'])
 CURRENCY['MRO'] = Currency(code='MRO', numeric='478', decimals=2, symbol=u'', name=u'Ouguiya', countries=[u'MAURITANIA'])
