@@ -1,10 +1,7 @@
 include MANIFEST.in
 include RELEASE-VERSION
-include *.txt
 include *.md
 include *.py
 recursive-include money *
 
-recursive-include tests *
-recursive-exclude * __pycache__
 recursive-exclude * *.py[co]

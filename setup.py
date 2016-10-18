@@ -27,7 +27,7 @@ class PyTest(TestCommand):
         self.test_suite = True
 
     def run_tests(self):
-        #import here, cause outside the eggs aren't loaded
+        # import here, cause outside the eggs aren't loaded
         import pytest
         errno = pytest.main(self.test_args)
         sys.exit(errno)
@@ -38,8 +38,9 @@ keywords = 'money currency finance'.split()
 tests_require = [
     'pytest-django',
     'pytest-cov',
-    'django<1.7',
+    'django==1.9',
     'psycopg2',
+    'six',
 ]
 
 requirements = [
@@ -47,7 +48,7 @@ requirements = [
 ]
 
 extras_require = {
-    'django':  ['Django < 1.7', ],
+    'django':  ['Django==1.9', ],
 }
 
 dependency_links = []
@@ -55,7 +56,6 @@ dependency_links = []
 setup(
     name='python-money',
     version=get_git_version(),
-    source_label=get_git_hash(),
     description='Primitives for working with money and currencies in Python',
     url='http://github.com/poswald/python-money',
     maintainer='Paul Oswald',
@@ -64,7 +64,6 @@ setup(
     platforms=["any"],
     keywords=keywords,
     long_description=README,
-    #test_suite='tests',
     packages=[
         'money',
     ],

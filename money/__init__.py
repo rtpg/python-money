@@ -1,1 +1,1 @@
-from money import *
+from .money import *
